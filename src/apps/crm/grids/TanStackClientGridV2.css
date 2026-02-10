@@ -203,6 +203,70 @@
   background: rgba(255, 71, 87, 0.15);
 }
 
+/* --- Nested view toggle --- */
+.k2-nested-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+  color: #b0b0cc;
+  font-size: 0.78rem;
+  margin-right: 0.5rem;
+  user-select: none;
+}
+
+.k2-nested-toggle span {
+  white-space: nowrap;
+}
+
+/* --- Group rows (nested view) --- */
+.k2-group-row {
+  cursor: pointer;
+  background: #1e1e35;
+  border-bottom: 1px solid #2a2a3e;
+}
+
+.k2-group-row:hover {
+  background: #252545;
+}
+
+.k2-group-cell {
+  padding: 0.45rem 0.75rem;
+  color: #c0c0d8;
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+  border-bottom: 1px solid #2a2a3e;
+}
+
+.k2-group-toggle {
+  display: inline-block;
+  width: 16px;
+  font-size: 0.65rem;
+  color: #888;
+  margin-right: 0.35rem;
+}
+
+.k2-group-label {
+  color: #888;
+  font-weight: 400;
+}
+
+.k2-group-value {
+  color: #e0e0f0;
+}
+
+.k2-group-count {
+  color: #666;
+  font-weight: 400;
+  font-size: 0.75rem;
+  margin-left: 0.35rem;
+}
+
+.k2-nested-data-row > .k2-cell:first-child {
+  padding-left: calc(var(--nest-depth, 0) * 24px + 12px);
+}
+
 /* --- Grid content scrollable area --- */
 .k2-grid-content {
   overflow-x: auto;

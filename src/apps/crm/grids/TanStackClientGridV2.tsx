@@ -159,6 +159,8 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [editingRowId, setEditingRowId] = useState<number | null>(null)
   const [editValues, setEditValues] = useState<Record<string, string>>({})
+  const [nestedView, setNestedView] = useState(false)
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set())
   const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({})
   const [globalFilter, setGlobalFilter] = useState('')
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
@@ -319,6 +321,99 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
   const rangeStart = pageIndex * pageSize + 1
   const rangeEnd = Math.min((pageIndex + 1) * pageSize, totalFiltered)
 
+  // --- Grouping logic for nested view ---
+  type GroupNode = {
+    type: 'group'
+    columnId: string
+    label: string
+    value: string
+    depth: number
+    key: string
+    count: number
+    children: (GroupNode | { type: 'row'; row: typeof table extends { getRowModel: () => { rows: (infer R)[] } } ? R : never })[]
+  }
+
+  function buildGroupTree(
+    rows: ReturnType<typeof table.getRowModel>['rows'],
+    sortCols: SortingState,
+    depth: number,
+    parentKey: string,
+  ): GroupNode['children'] {
+    if (depth >= sortCols.length) {
+      return rows.map(r => ({ type: 'row' as const, row: r }))
+    }
+    const colId = sortCols[depth].id
+    const colLabel = COLUMN_LABELS[colId] ?? colId
+    const groups = new Map<string, typeof rows>()
+    for (const row of rows) {
+      let val = String(row.getValue(colId) ?? '')
+      if (colId === 'created_at') val = new Date(val).toLocaleDateString()
+      if (!groups.has(val)) groups.set(val, [])
+      groups.get(val)!.push(row)
+    }
+    return Array.from(groups.entries()).map(([val, groupRows]) => {
+      const key = parentKey ? `${parentKey}|${colId}=${val}` : `${colId}=${val}`
+      return {
+        type: 'group' as const,
+        columnId: colId,
+        label: colLabel,
+        value: val,
+        depth,
+        key,
+        count: groupRows.length,
+        children: buildGroupTree(groupRows, sortCols, depth + 1, key),
+      }
+    })
+  }
+
+  function toggleGroup(key: string) {
+    setCollapsedGroups(prev => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
+      return next
+    })
+  }
+
+  const colCount = table.getVisibleLeafColumns().length
+
+  function renderGroupedBody(nodes: GroupNode['children'], rowIndex: { value: number }): React.ReactNode[] {
+    const result: React.ReactNode[] = []
+    for (const node of nodes) {
+      if (node.type === 'group') {
+        const isCollapsed = collapsedGroups.has(node.key)
+        result.push(
+          <tr key={`group-${node.key}`} className="k2-group-row" onClick={() => toggleGroup(node.key)}>
+            <td colSpan={colCount} className="k2-group-cell" style={{ paddingLeft: `${node.depth * 24 + 12}px` }}>
+              <span className="k2-group-toggle">{isCollapsed ? '▶' : '▼'}</span>
+              <span className="k2-group-label">{node.label}: </span>
+              <span className="k2-group-value">{node.value}</span>
+              <span className="k2-group-count">({node.count})</span>
+            </td>
+          </tr>
+        )
+        if (!isCollapsed) {
+          result.push(...renderGroupedBody(node.children, rowIndex))
+        }
+      } else {
+        const i = rowIndex.value++
+        const row = node.row
+        result.push(
+          <tr key={row.id} className={`k2-row ${i % 2 === 1 ? 'k2-alt' : ''} ${row.getIsSelected() ? 'k2-selected' : ''} ${row.original.id === editingRowId ? 'k2-editing' : ''} k2-nested-data-row`}
+            style={{ ['--nest-depth' as string]: sorting.length }}
+          >
+            {row.getVisibleCells().map((cell) => (
+              <td key={cell.id} className="k2-cell" style={{ width: cell.column.getSize() }}>
+                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+              </td>
+            ))}
+          </tr>
+        )
+      }
+    }
+    return result
+  }
+
   return (
     <div className="k2-grid">
       {/* Toolbar */}
@@ -338,6 +433,15 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
           )}
         </div>
         <div className="k2-toolbar-right">
+          <label className="k2-nested-toggle">
+            <input
+              type="checkbox"
+              className="k2-checkbox"
+              checked={nestedView}
+              onChange={(e) => { setNestedView(e.target.checked); setCollapsedGroups(new Set()) }}
+            />
+            <span>Nested View</span>
+          </label>
           <input
             className="k2-global-search"
             placeholder="Search all columns..."
@@ -550,21 +654,28 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
 
           {/* Body */}
           <tbody>
-            {table.getRowModel().rows.map((row, i) => (
-              <tr key={row.id} className={`k2-row ${i % 2 === 1 ? 'k2-alt' : ''} ${row.getIsSelected() ? 'k2-selected' : ''} ${row.original.id === editingRowId ? 'k2-editing' : ''}`}>
-                {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="k2-cell" style={{ width: cell.column.getSize() }}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                ))}
-              </tr>
-            ))}
+            {nestedView && sorting.length > 0 ? (
+              renderGroupedBody(
+                buildGroupTree(table.getSortedRowModel().rows, sorting, 0, ''),
+                { value: 0 },
+              )
+            ) : (
+              table.getRowModel().rows.map((row, i) => (
+                <tr key={row.id} className={`k2-row ${i % 2 === 1 ? 'k2-alt' : ''} ${row.getIsSelected() ? 'k2-selected' : ''} ${row.original.id === editingRowId ? 'k2-editing' : ''}`}>
+                  {row.getVisibleCells().map((cell) => (
+                    <td key={cell.id} className="k2-cell" style={{ width: cell.column.getSize() }}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </td>
+                  ))}
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
 
-      {/* Pager */}
-      <div className="k2-pager">
+      {/* Pager (hidden in nested view) */}
+      <div className="k2-pager" style={nestedView && sorting.length > 0 ? { display: 'none' } : undefined}>
         <div className="k2-pager-nav">
           <button
             className="k2-pager-btn"

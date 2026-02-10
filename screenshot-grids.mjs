@@ -6,19 +6,17 @@ const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
 await page.goto('http://localhost:5174/', { waitUntil: 'networkidle' });
 await page.waitForTimeout(6000);
 
-// Switch to TanStack V2
-await page.selectOption('#grid-select', 'tanstack-v2');
-await page.waitForTimeout(2000);
-
-// Click Company to sort asc, then Name to add second sort
+// V2 is already default - click Company to sort, then Name
 await page.click('.k2-header-text:has-text("COMPANY")');
 await page.waitForTimeout(300);
 await page.click('.k2-header-text:has-text("NAME")');
 await page.waitForTimeout(300);
-await page.click('.k2-header-text:has-text("CREATED")');
+
+// Enable Nested View
+await page.click('.k2-nested-toggle');
 await page.waitForTimeout(500);
 
-await page.screenshot({ path: 'screenshot-v2-sortzone.png', fullPage: false });
-console.log('V2 sort zone screenshot taken');
+await page.screenshot({ path: 'screenshot-v2-nested.png', fullPage: false });
+console.log('V2 nested view screenshot taken');
 
 await browser.close();
