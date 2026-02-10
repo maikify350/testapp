@@ -5,6 +5,7 @@ export type GridLibrary = 'ag-grid' | 'tanstack' | 'tanstack-v2' | 'mui-datagrid
 export interface ClientGridProps {
   clients: Client[]
   onEdit: (client: Client) => void
+  onSave?: (client: Client) => Promise<void> | void
   onDelete: (clientId: number) => void
 }
 

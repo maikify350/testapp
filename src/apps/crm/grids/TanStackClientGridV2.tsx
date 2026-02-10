@@ -154,9 +154,11 @@ function ResizeHandle({
   )
 }
 
-export default function TanStackClientGridV2({ clients, onEdit, onDelete }: ClientGridProps) {
+export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete }: ClientGridProps) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [editingRowId, setEditingRowId] = useState<number | null>(null)
+  const [editValues, setEditValues] = useState<Record<string, string>>({})
   const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({})
   const [globalFilter, setGlobalFilter] = useState('')
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
@@ -205,21 +207,45 @@ export default function TanStackClientGridV2({ clients, onEdit, onDelete }: Clie
       header: 'Name',
       filterFn: operatorFilterFn,
       size: 160,
+      cell: (info) => {
+        if (info.row.original.id === editingRowId) {
+          return <input className="k2-inline-input" value={editValues.name ?? ''} onChange={e => setEditValues(v => ({ ...v, name: e.target.value }))} />
+        }
+        return info.getValue()
+      },
     }),
     columnHelper.accessor('email', {
       header: 'Email',
       filterFn: operatorFilterFn,
       size: 220,
+      cell: (info) => {
+        if (info.row.original.id === editingRowId) {
+          return <input className="k2-inline-input" value={editValues.email ?? ''} onChange={e => setEditValues(v => ({ ...v, email: e.target.value }))} />
+        }
+        return info.getValue()
+      },
     }),
     columnHelper.accessor('phone', {
       header: 'Phone',
       filterFn: operatorFilterFn,
       size: 150,
+      cell: (info) => {
+        if (info.row.original.id === editingRowId) {
+          return <input className="k2-inline-input" value={editValues.phone ?? ''} onChange={e => setEditValues(v => ({ ...v, phone: e.target.value }))} />
+        }
+        return info.getValue()
+      },
     }),
     columnHelper.accessor('company', {
       header: 'Company',
       filterFn: operatorFilterFn,
       size: 200,
+      cell: (info) => {
+        if (info.row.original.id === editingRowId) {
+          return <input className="k2-inline-input" value={editValues.company ?? ''} onChange={e => setEditValues(v => ({ ...v, company: e.target.value }))} />
+        }
+        return info.getValue()
+      },
     }),
     columnHelper.accessor('created_at', {
       header: 'Created',
@@ -230,16 +256,43 @@ export default function TanStackClientGridV2({ clients, onEdit, onDelete }: Clie
     columnHelper.display({
       id: 'actions',
       header: 'Actions',
-      size: 110,
+      size: 140,
       enableResizing: false,
-      cell: ({ row }) => (
-        <div className="k2-actions">
-          <button className="k2-action-btn k2-edit" onClick={() => onEdit(row.original)}>Edit</button>
-          <button className="k2-action-btn k2-delete" onClick={() => onDelete(row.original.id)}>Delete</button>
-        </div>
-      ),
+      cell: ({ row }) => {
+        if (row.original.id === editingRowId) {
+          return (
+            <div className="k2-actions">
+              <button className="k2-action-btn k2-save" onClick={async () => {
+                if (onSave) {
+                  await onSave({ ...row.original, ...editValues })
+                }
+                setEditingRowId(null)
+                setEditValues({})
+              }}>Save</button>
+              <button className="k2-action-btn k2-cancel" onClick={() => {
+                setEditingRowId(null)
+                setEditValues({})
+              }}>Cancel</button>
+            </div>
+          )
+        }
+        return (
+          <div className="k2-actions">
+            <button className="k2-action-btn k2-edit" onClick={() => {
+              setEditingRowId(row.original.id)
+              setEditValues({
+                name: row.original.name ?? '',
+                email: row.original.email ?? '',
+                phone: row.original.phone ?? '',
+                company: row.original.company ?? '',
+              })
+            }}>Edit</button>
+            <button className="k2-action-btn k2-delete" onClick={() => onDelete(row.original.id)}>Delete</button>
+          </div>
+        )
+      },
     }),
-  ], [onEdit, onDelete])
+  ], [onEdit, onSave, onDelete, editingRowId, editValues])
 
   const table = useReactTable({
     data: clients,
@@ -498,7 +551,7 @@ export default function TanStackClientGridV2({ clients, onEdit, onDelete }: Clie
           {/* Body */}
           <tbody>
             {table.getRowModel().rows.map((row, i) => (
-              <tr key={row.id} className={`k2-row ${i % 2 === 1 ? 'k2-alt' : ''} ${row.getIsSelected() ? 'k2-selected' : ''}`}>
+              <tr key={row.id} className={`k2-row ${i % 2 === 1 ? 'k2-alt' : ''} ${row.getIsSelected() ? 'k2-selected' : ''} ${row.original.id === editingRowId ? 'k2-editing' : ''}`}>
                 {row.getVisibleCells().map((cell) => (
                   <td key={cell.id} className="k2-cell" style={{ width: cell.column.getSize() }}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}

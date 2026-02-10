@@ -469,6 +469,28 @@
   border-right: none;
 }
 
+/* --- Inline editing --- */
+.k2-row.k2-editing {
+  background: rgba(100, 108, 255, 0.06) !important;
+}
+
+.k2-inline-input {
+  width: 100%;
+  padding: 0.25rem 0.4rem;
+  border: 1px solid #646cff;
+  border-radius: 3px;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  font-size: 0.8rem;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.k2-inline-input:focus {
+  border-color: #8b8fff;
+  box-shadow: 0 0 0 2px rgba(100, 108, 255, 0.2);
+}
+
 /* --- Action buttons --- */
 .k2-actions {
   display: flex;
@@ -502,6 +524,26 @@
 
 .k2-delete:hover {
   background: rgba(255, 71, 87, 0.2);
+}
+
+.k2-save {
+  background: rgba(46, 213, 115, 0.12);
+  color: #2ed573;
+  border-color: rgba(46, 213, 115, 0.25);
+}
+
+.k2-save:hover {
+  background: rgba(46, 213, 115, 0.25);
+}
+
+.k2-cancel {
+  background: rgba(180, 180, 200, 0.1);
+  color: #999;
+  border-color: rgba(180, 180, 200, 0.2);
+}
+
+.k2-cancel:hover {
+  background: rgba(180, 180, 200, 0.2);
 }
 
 /* --- Pager (Kendo-style) --- */

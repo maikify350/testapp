@@ -115,8 +115,26 @@ function ClientList() {
     }
   }
 
+  async function saveClient(client: Client) {
+    const record = {
+      name: client.name,
+      email: client.email,
+      phone: client.phone,
+      company: client.company,
+    }
+    const { error } = await supabase
+      .from('clients')
+      .update(record)
+      .eq('id', client.id)
+    if (error) {
+      setError(error.message)
+    } else {
+      setClients(clients.map(c => (c.id === client.id ? { ...c, ...record } : c)))
+    }
+  }
+
   function renderGrid() {
-    const gridProps = { clients, onEdit: startEdit, onDelete: deleteClient }
+    const gridProps = { clients, onEdit: startEdit, onDelete: deleteClient, onSave: saveClient }
     switch (gridLibrary) {
       case 'ag-grid':
         return <AgGridClientGrid {...gridProps} />
