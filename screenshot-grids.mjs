@@ -8,8 +8,17 @@ await page.waitForTimeout(6000);
 
 // Switch to TanStack (Kendo-style)
 await page.selectOption('#grid-select', 'tanstack');
-await page.waitForTimeout(3000);
-await page.screenshot({ path: 'screenshot-tanstack-kendo.png', fullPage: false });
-console.log('TanStack Kendo-style screenshot taken');
+await page.waitForTimeout(2000);
+
+// Click Company header to sort ascending
+await page.click('text=COMPANY');
+await page.waitForTimeout(500);
+
+// Click Name header to add second sort
+await page.click('text=NAME');
+await page.waitForTimeout(500);
+
+await page.screenshot({ path: 'screenshot-tanstack-multisort.png', fullPage: false });
+console.log('TanStack multi-sort screenshot taken');
 
 await browser.close();

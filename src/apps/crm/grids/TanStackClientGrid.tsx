@@ -247,7 +247,7 @@ export default function TanStackClientGrid({ clients, onEdit, onDelete }: Client
 
       {/* Table */}
       <div className="k-grid-content">
-        <table className="k-table" style={{ width: table.getCenterTotalSize() }}>
+        <table className="k-table">
           {/* Header row */}
           <thead>
             <tr className="k-header-row">
@@ -259,7 +259,20 @@ export default function TanStackClientGrid({ clients, onEdit, onDelete }: Client
                 >
                   <div
                     className={`k-header-content ${header.column.getCanSort() ? 'k-sortable' : ''}`}
-                    onClick={header.column.getToggleSortingHandler()}
+                    onClick={() => {
+                      if (!header.column.getCanSort()) return
+                      const current = header.column.getIsSorted()
+                      if (!current) {
+                        // Add ascending sort for this column
+                        setSorting(prev => [...prev, { id: header.column.id, desc: false }])
+                      } else if (current === 'asc') {
+                        // Toggle to descending
+                        setSorting(prev => prev.map(s => s.id === header.column.id ? { ...s, desc: true } : s))
+                      } else {
+                        // Remove this column from sort
+                        setSorting(prev => prev.filter(s => s.id !== header.column.id))
+                      }
+                    }}
                   >
                     <span className="k-header-text">
                       {flexRender(header.column.columnDef.header, header.getContext())}
