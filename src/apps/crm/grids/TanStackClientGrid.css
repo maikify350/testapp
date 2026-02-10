@@ -1,0 +1,412 @@
+/* ============================================
+   Kendo-style Grid Theme (Dark)
+   Built on TanStack Table — zero licensing
+   ============================================ */
+
+/* --- Grid container --- */
+.k-grid {
+  border: 1px solid #3a3a4e;
+  border-radius: 4px;
+  overflow: hidden;
+  font-size: 0.875rem;
+  background: #1e1e2e;
+}
+
+/* --- Toolbar --- */
+.k-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  background: #282840;
+  border-bottom: 1px solid #3a3a4e;
+  gap: 0.75rem;
+}
+
+.k-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.k-toolbar-label {
+  font-weight: 600;
+  color: #b0b0cc;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.k-clear-sort-btn {
+  padding: 0.2rem 0.5rem;
+  font-size: 0.75rem;
+  background: rgba(100, 108, 255, 0.15);
+  color: #646cff;
+  border: 1px solid rgba(100, 108, 255, 0.3);
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.k-clear-sort-btn:hover {
+  background: rgba(100, 108, 255, 0.25);
+}
+
+.k-toolbar-right {
+  display: flex;
+  align-items: center;
+}
+
+.k-global-search {
+  padding: 0.35rem 0.6rem;
+  width: 200px;
+  border: 1px solid #3a3a4e;
+  border-radius: 4px;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  font-size: 0.8rem;
+}
+
+.k-global-search:focus {
+  outline: none;
+  border-color: #646cff;
+}
+
+/* --- Grid content scrollable area --- */
+.k-grid-content {
+  overflow-x: auto;
+}
+
+/* --- Table --- */
+.k-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 100%;
+}
+
+/* --- Header --- */
+.k-header-row {
+  background: #252540;
+}
+
+.k-header-cell {
+  position: relative;
+  padding: 0.6rem 0.75rem;
+  font-weight: 600;
+  color: #c0c0d8;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 2px solid #3a3a4e;
+  border-right: 1px solid #3a3a4e;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.k-header-cell:last-child {
+  border-right: none;
+}
+
+.k-header-content {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.k-header-content.k-sortable {
+  cursor: pointer;
+}
+
+.k-header-content.k-sortable:hover .k-header-text {
+  color: #fff;
+}
+
+/* --- Sort badge (Kendo-style numbered pill) --- */
+.k-sort-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  background: #646cff;
+  color: #fff;
+  border-radius: 10px;
+  padding: 0.1rem 0.35rem;
+  font-size: 0.65rem;
+  line-height: 1;
+  font-weight: 700;
+  min-width: 1.1rem;
+  justify-content: center;
+}
+
+.k-sort-arrow {
+  font-size: 0.55rem;
+}
+
+.k-sort-index {
+  font-size: 0.6rem;
+}
+
+/* --- Filter header row --- */
+.k-filter-header-row {
+  background: #1e1e30;
+}
+
+.k-filter-header-cell {
+  padding: 0.35rem 0.5rem;
+  border-bottom: 1px solid #3a3a4e;
+  border-right: 1px solid #3a3a4e;
+}
+
+.k-filter-header-cell:last-child {
+  border-right: none;
+}
+
+/* --- Filter cell (operator + input) --- */
+.k-filter-cell {
+  position: relative;
+}
+
+.k-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border: 1px solid #3a3a4e;
+  border-radius: 3px;
+  overflow: hidden;
+  background: #1a1a2e;
+}
+
+.k-filter-operator-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  background: #252540;
+  border: none;
+  border-right: 1px solid #3a3a4e;
+  color: #888;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.k-filter-operator-btn:hover {
+  background: #303050;
+  color: #646cff;
+}
+
+.k-filter-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: #e0e0e0;
+  padding: 0.25rem 0.4rem;
+  font-size: 0.8rem;
+  outline: none;
+  min-width: 0;
+}
+
+.k-filter-clear-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 26px;
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.k-filter-clear-btn:hover {
+  color: #ff6b6b;
+}
+
+/* --- Filter operator dropdown --- */
+.k-filter-operator-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 100;
+  min-width: 160px;
+  background: #252540;
+  border: 1px solid #3a3a4e;
+  border-radius: 4px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  margin-top: 2px;
+  overflow: hidden;
+}
+
+.k-filter-operator-item {
+  display: block;
+  width: 100%;
+  padding: 0.4rem 0.75rem;
+  text-align: left;
+  background: none;
+  border: none;
+  color: #c0c0d8;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.k-filter-operator-item:hover {
+  background: #303050;
+}
+
+.k-filter-operator-item.active {
+  background: rgba(100, 108, 255, 0.15);
+  color: #646cff;
+  font-weight: 600;
+}
+
+/* --- Resize handle --- */
+.k-resize-handle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 5px;
+  height: 100%;
+  cursor: col-resize;
+  user-select: none;
+  touch-action: none;
+}
+
+.k-resize-handle:hover,
+.k-resize-handle.k-resizing {
+  background: #646cff;
+  opacity: 0.6;
+}
+
+/* --- Body rows --- */
+.k-row {
+  transition: background 0.1s;
+}
+
+.k-alt {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.k-row:hover {
+  background: rgba(100, 108, 255, 0.08) !important;
+}
+
+/* --- Body cells --- */
+.k-cell {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #2a2a3e;
+  border-right: 1px solid #2a2a3e;
+  color: #d0d0e0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 0;
+}
+
+.k-cell:last-child {
+  border-right: none;
+}
+
+/* --- Action buttons --- */
+.k-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.k-action-btn {
+  padding: 0.2rem 0.5rem;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s;
+}
+
+.k-edit {
+  background: rgba(100, 108, 255, 0.12);
+  color: #646cff;
+  border-color: rgba(100, 108, 255, 0.25);
+}
+
+.k-edit:hover {
+  background: rgba(100, 108, 255, 0.25);
+}
+
+.k-delete {
+  background: rgba(255, 71, 87, 0.1);
+  color: #ff4757;
+  border-color: rgba(255, 71, 87, 0.2);
+}
+
+.k-delete:hover {
+  background: rgba(255, 71, 87, 0.2);
+}
+
+/* --- Pager (Kendo-style) --- */
+.k-pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  background: #252540;
+  border-top: 1px solid #3a3a4e;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.k-pager-nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.k-pager-btn,
+.k-pager-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 0.3rem;
+  border: 1px solid #3a3a4e;
+  border-radius: 3px;
+  background: #1e1e2e;
+  color: #b0b0cc;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.k-pager-btn:hover:not(:disabled),
+.k-pager-num:hover {
+  background: #303050;
+  color: #fff;
+}
+
+.k-pager-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.k-pager-num.k-active {
+  background: #646cff;
+  color: #fff;
+  border-color: #646cff;
+  font-weight: 700;
+}
+
+.k-pager-info {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #888;
+  font-size: 0.8rem;
+}
+
+.k-pager-size {
+  padding: 0.2rem 0.4rem;
+  background: #1e1e2e;
+  border: 1px solid #3a3a4e;
+  border-radius: 3px;
+  color: #e0e0e0;
+  font-size: 0.8rem;
+}
