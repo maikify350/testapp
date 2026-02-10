@@ -6,6 +6,7 @@ import type { Client } from './types'
 
 const AgGridClientGrid = lazy(() => import('./grids/AgGridClientGrid'))
 const TanStackClientGrid = lazy(() => import('./grids/TanStackClientGrid'))
+const TanStackClientGridV2 = lazy(() => import('./grids/TanStackClientGridV2'))
 const MuiDataGridClientGrid = lazy(() => import('./grids/MuiDataGridClientGrid'))
 
 function ClientList() {
@@ -121,6 +122,8 @@ function ClientList() {
         return <AgGridClientGrid {...gridProps} />
       case 'tanstack':
         return <TanStackClientGrid {...gridProps} />
+      case 'tanstack-v2':
+        return <TanStackClientGridV2 {...gridProps} />
       case 'mui-datagrid':
         return <MuiDataGridClientGrid {...gridProps} />
     }
