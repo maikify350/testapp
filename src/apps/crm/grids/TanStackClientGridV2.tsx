@@ -164,8 +164,16 @@ export default function TanStackClientGridV2({ clients, onEdit, onDelete }: Clie
     'select', 'name', 'email', 'phone', 'company', 'created_at', 'actions',
   ])
   const [dragOverId, setDragOverId] = useState<string | null>(null)
+  const [sortZoneActive, setSortZoneActive] = useState(false)
+  const [sortChipDragOver, setSortChipDragOver] = useState<string | null>(null)
   const dragColumnRef = useRef<string | null>(null)
+  const dragSourceRef = useRef<'header' | 'chip' | null>(null)
   const didDragRef = useRef(false)
+
+  const COLUMN_LABELS: Record<string, string> = {
+    name: 'Name', email: 'Email', phone: 'Phone',
+    company: 'Company', created_at: 'Created',
+  }
 
   const selectedCount = Object.keys(rowSelection).length
 
@@ -286,6 +294,101 @@ export default function TanStackClientGridV2({ clients, onEdit, onDelete }: Clie
         </div>
       </div>
 
+      {/* Sort drop zone */}
+      <div
+        className={`k2-sort-zone ${sortZoneActive ? 'k2-sort-zone-active' : ''}`}
+        onDragOver={(e) => {
+          if (dragSourceRef.current === 'header' || dragSourceRef.current === 'chip') {
+            e.preventDefault()
+            e.dataTransfer.dropEffect = 'move'
+            setSortZoneActive(true)
+          }
+        }}
+        onDragLeave={() => setSortZoneActive(false)}
+        onDrop={(e) => {
+          e.preventDefault()
+          setSortZoneActive(false)
+          const colId = dragColumnRef.current
+          if (!colId || colId === 'select' || colId === 'actions') return
+          // Only add if coming from header and not already sorted
+          if (dragSourceRef.current === 'header') {
+            const already = sorting.find(s => s.id === colId)
+            if (!already) {
+              setSorting(prev => [...prev, { id: colId, desc: false }])
+            }
+          }
+          dragColumnRef.current = null
+          dragSourceRef.current = null
+          didDragRef.current = true
+        }}
+      >
+        {sorting.length === 0 ? (
+          <span className="k2-sort-zone-hint">Drag a column header here to set sort order</span>
+        ) : (
+          sorting.map((s, idx) => (
+            <div
+              key={s.id}
+              className={`k2-sort-chip ${sortChipDragOver === s.id ? 'k2-sort-chip-drag-over' : ''}`}
+              draggable
+              onDragStart={(e) => {
+                e.stopPropagation()
+                dragColumnRef.current = s.id
+                dragSourceRef.current = 'chip'
+                e.dataTransfer.effectAllowed = 'move'
+              }}
+              onDragOver={(e) => {
+                if (dragSourceRef.current === 'chip') {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  setSortChipDragOver(s.id)
+                }
+              }}
+              onDragLeave={() => {
+                if (sortChipDragOver === s.id) setSortChipDragOver(null)
+              }}
+              onDrop={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                setSortZoneActive(false)
+                setSortChipDragOver(null)
+                const from = dragColumnRef.current
+                if (from && from !== s.id && dragSourceRef.current === 'chip') {
+                  setSorting(prev => {
+                    const next = [...prev]
+                    const fromIdx = next.findIndex(x => x.id === from)
+                    const toIdx = next.findIndex(x => x.id === s.id)
+                    const [item] = next.splice(fromIdx, 1)
+                    next.splice(toIdx, 0, item)
+                    return next
+                  })
+                }
+                dragColumnRef.current = null
+                dragSourceRef.current = null
+              }}
+              onDragEnd={() => {
+                setSortChipDragOver(null)
+                dragSourceRef.current = null
+              }}
+            >
+              <span className="k2-sort-chip-index">{idx + 1}</span>
+              <span className="k2-sort-chip-label">{COLUMN_LABELS[s.id] ?? s.id}</span>
+              <button
+                className="k2-sort-chip-dir"
+                onClick={() => setSorting(prev => prev.map(x => x.id === s.id ? { ...x, desc: !x.desc } : x))}
+              >
+                {s.desc ? '▼' : '▲'}
+              </button>
+              <button
+                className="k2-sort-chip-remove"
+                onClick={() => setSorting(prev => prev.filter(x => x.id !== s.id))}
+              >
+                ×
+              </button>
+            </div>
+          ))
+        )}
+      </div>
+
       {/* Table */}
       <div className="k2-grid-content">
         <table className="k2-table">
@@ -300,6 +403,7 @@ export default function TanStackClientGridV2({ clients, onEdit, onDelete }: Clie
                   draggable={header.column.id !== 'actions'}
                   onDragStart={(e) => {
                     dragColumnRef.current = header.column.id
+                    dragSourceRef.current = 'header'
                     didDragRef.current = false
                     e.dataTransfer.effectAllowed = 'move'
                     // Make the drag ghost semi-transparent

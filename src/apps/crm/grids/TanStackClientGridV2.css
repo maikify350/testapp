@@ -97,6 +97,112 @@
   border-color: #646cff;
 }
 
+/* --- Sort drop zone --- */
+.k2-sort-zone {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.75rem;
+  min-height: 38px;
+  background: #1a1a2e;
+  border-bottom: 1px solid #3a3a4e;
+  flex-wrap: wrap;
+  transition: background 0.15s;
+}
+
+.k2-sort-zone-active {
+  background: rgba(100, 108, 255, 0.1);
+  border-bottom-color: #646cff;
+}
+
+.k2-sort-zone-hint {
+  color: #555;
+  font-size: 0.78rem;
+  font-style: italic;
+  user-select: none;
+}
+
+.k2-sort-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.2rem 0.15rem 0.2rem 0.35rem;
+  background: #282840;
+  border: 1px solid #3a3a4e;
+  border-radius: 4px;
+  cursor: grab;
+  user-select: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.k2-sort-chip:active {
+  cursor: grabbing;
+}
+
+.k2-sort-chip.k2-sort-chip-drag-over {
+  border-color: #646cff;
+  background: rgba(100, 108, 255, 0.15);
+}
+
+.k2-sort-chip-index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  background: #646cff;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 0.6rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.k2-sort-chip-label {
+  color: #c0c0d8;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0 0.15rem;
+}
+
+.k2-sort-chip-dir {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: none;
+  border: none;
+  color: #646cff;
+  cursor: pointer;
+  font-size: 0.65rem;
+  border-radius: 3px;
+}
+
+.k2-sort-chip-dir:hover {
+  background: rgba(100, 108, 255, 0.2);
+}
+
+.k2-sort-chip-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  font-size: 0.85rem;
+  border-radius: 3px;
+  line-height: 1;
+}
+
+.k2-sort-chip-remove:hover {
+  color: #ff4757;
+  background: rgba(255, 71, 87, 0.15);
+}
+
 /* --- Grid content scrollable area --- */
 .k2-grid-content {
   overflow-x: auto;
