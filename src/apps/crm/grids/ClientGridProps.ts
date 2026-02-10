@@ -9,8 +9,8 @@ export interface ClientGridProps {
 }
 
 export const GRID_OPTIONS: { value: GridLibrary; label: string }[] = [
+  { value: 'tanstack-v2', label: 'TanStack Table V2' },
   { value: 'ag-grid', label: 'AG Grid Community' },
   { value: 'tanstack', label: 'TanStack Table' },
-  { value: 'tanstack-v2', label: 'TanStack Table V2' },
   { value: 'mui-datagrid', label: 'MUI DataGrid' },
 ]

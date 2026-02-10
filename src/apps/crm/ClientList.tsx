@@ -14,7 +14,7 @@ function ClientList() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<number | null>(null)
-  const [gridLibrary, setGridLibrary] = useState<GridLibrary>('ag-grid')
+  const [gridLibrary, setGridLibrary] = useState<GridLibrary>('tanstack-v2')
   const [loadInfo, setLoadInfo] = useState<{ label: string; records: number; secs: number } | null>(null)
   const loadStart = useRef<number>(0)
 
