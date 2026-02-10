@@ -1,7 +1,7 @@
-import { TodoApp } from './apps/todo'
+import { CrmApp } from './apps/crm'
 
 function App() {
-  return <TodoApp />
+  return <CrmApp />
 }
 
 export default App
