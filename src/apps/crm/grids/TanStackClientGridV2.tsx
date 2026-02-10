@@ -8,7 +8,7 @@ import {
   createColumnHelper,
   flexRender,
 } from '@tanstack/react-table'
-import type { SortingState, ColumnFiltersState, Column, ColumnSizingState } from '@tanstack/react-table'
+import type { SortingState, ColumnFiltersState, Column, ColumnSizingState, ColumnOrderState } from '@tanstack/react-table'
 import type { ClientGridProps } from './ClientGridProps'
 import type { Client } from '../types'
 import './TanStackClientGridV2.css'
@@ -159,6 +159,12 @@ export default function TanStackClientGridV2({ clients, onEdit, onDelete }: Clie
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({})
   const [globalFilter, setGlobalFilter] = useState('')
+  const [columnOrder, setColumnOrder] = useState<ColumnOrderState>([
+    'name', 'email', 'phone', 'company', 'created_at', 'actions',
+  ])
+  const [dragOverId, setDragOverId] = useState<string | null>(null)
+  const dragColumnRef = useRef<string | null>(null)
+  const didDragRef = useRef(false)
 
   const columns = useMemo(() => [
     columnHelper.accessor('name', {
@@ -204,11 +210,12 @@ export default function TanStackClientGridV2({ clients, onEdit, onDelete }: Clie
   const table = useReactTable({
     data: clients,
     columns,
-    state: { sorting, columnFilters, columnSizing, globalFilter },
+    state: { sorting, columnFilters, columnSizing, globalFilter, columnOrder },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnSizingChange: setColumnSizing,
     onGlobalFilterChange: setGlobalFilter,
+    onColumnOrderChange: setColumnOrder,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -254,12 +261,56 @@ export default function TanStackClientGridV2({ clients, onEdit, onDelete }: Clie
               {table.getHeaderGroups()[0].headers.map((header) => (
                 <th
                   key={header.id}
-                  className="k2-header-cell"
+                  className={`k2-header-cell${dragOverId === header.column.id ? ' k2-drag-over' : ''}`}
                   style={{ width: header.getSize() }}
+                  draggable={header.column.id !== 'actions'}
+                  onDragStart={(e) => {
+                    dragColumnRef.current = header.column.id
+                    didDragRef.current = false
+                    e.dataTransfer.effectAllowed = 'move'
+                    // Make the drag ghost semi-transparent
+                    const el = e.currentTarget
+                    el.style.opacity = '0.5'
+                    setTimeout(() => { el.style.opacity = '' }, 0)
+                  }}
+                  onDragOver={(e) => {
+                    e.preventDefault()
+                    e.dataTransfer.dropEffect = 'move'
+                    if (dragColumnRef.current && dragColumnRef.current !== header.column.id && header.column.id !== 'actions') {
+                      didDragRef.current = true
+                      setDragOverId(header.column.id)
+                    }
+                  }}
+                  onDragLeave={() => {
+                    if (dragOverId === header.column.id) setDragOverId(null)
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault()
+                    setDragOverId(null)
+                    const from = dragColumnRef.current
+                    const to = header.column.id
+                    if (from && from !== to && to !== 'actions') {
+                      setColumnOrder(prev => {
+                        const next = [...prev]
+                        const fromIdx = next.indexOf(from)
+                        const toIdx = next.indexOf(to)
+                        next.splice(fromIdx, 1)
+                        next.splice(toIdx, 0, from)
+                        return next
+                      })
+                    }
+                    dragColumnRef.current = null
+                  }}
+                  onDragEnd={() => {
+                    setDragOverId(null)
+                    dragColumnRef.current = null
+                  }}
                 >
                   <div
                     className={`k2-header-content ${header.column.getCanSort() ? 'k2-sortable' : ''}`}
                     onClick={() => {
+                      // Don't sort if we just finished a drag
+                      if (didDragRef.current) { didDragRef.current = false; return }
                       if (!header.column.getCanSort()) return
                       const current = header.column.getIsSorted()
                       if (!current) {

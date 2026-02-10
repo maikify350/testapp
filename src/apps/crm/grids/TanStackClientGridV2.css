@@ -103,6 +103,19 @@
   user-select: none;
 }
 
+.k2-header-cell[draggable="true"] {
+  cursor: grab;
+}
+
+.k2-header-cell[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+.k2-header-cell.k2-drag-over {
+  background: rgba(100, 108, 255, 0.2);
+  border-left: 2px solid #646cff;
+}
+
 .k2-header-cell:last-child {
   border-right: none;
 }
