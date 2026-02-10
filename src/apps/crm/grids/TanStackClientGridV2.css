@@ -37,6 +37,32 @@
   letter-spacing: 0.05em;
 }
 
+.k2-selected-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.75rem;
+  background: rgba(46, 213, 115, 0.15);
+  color: #2ed573;
+  border: 1px solid rgba(46, 213, 115, 0.3);
+  border-radius: 3px;
+}
+
+.k2-clear-selection-btn {
+  background: none;
+  border: none;
+  color: #2ed573;
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 0 0.15rem;
+  line-height: 1;
+}
+
+.k2-clear-selection-btn:hover {
+  color: #fff;
+}
+
 .k2-clear-sort-btn {
   padding: 0.2rem 0.5rem;
   font-size: 0.75rem;
@@ -302,6 +328,23 @@
 
 .k2-row:hover {
   background: rgba(100, 108, 255, 0.08) !important;
+}
+
+.k2-row.k2-selected {
+  background: rgba(100, 108, 255, 0.12) !important;
+}
+
+.k2-row.k2-selected:hover {
+  background: rgba(100, 108, 255, 0.18) !important;
+}
+
+/* --- Checkbox --- */
+.k2-checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: #646cff;
+  cursor: pointer;
+  margin: 0;
 }
 
 /* --- Body cells --- */

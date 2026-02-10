@@ -8,7 +8,7 @@ import {
   createColumnHelper,
   flexRender,
 } from '@tanstack/react-table'
-import type { SortingState, ColumnFiltersState, Column, ColumnSizingState, ColumnOrderState } from '@tanstack/react-table'
+import type { SortingState, ColumnFiltersState, Column, ColumnSizingState, ColumnOrderState, RowSelectionState } from '@tanstack/react-table'
 import type { ClientGridProps } from './ClientGridProps'
 import type { Client } from '../types'
 import './TanStackClientGridV2.css'
@@ -159,14 +159,40 @@ export default function TanStackClientGridV2({ clients, onEdit, onDelete }: Clie
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({})
   const [globalFilter, setGlobalFilter] = useState('')
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>([
-    'name', 'email', 'phone', 'company', 'created_at', 'actions',
+    'select', 'name', 'email', 'phone', 'company', 'created_at', 'actions',
   ])
   const [dragOverId, setDragOverId] = useState<string | null>(null)
   const dragColumnRef = useRef<string | null>(null)
   const didDragRef = useRef(false)
 
+  const selectedCount = Object.keys(rowSelection).length
+
   const columns = useMemo(() => [
+    columnHelper.display({
+      id: 'select',
+      size: 40,
+      enableResizing: false,
+      enableSorting: false,
+      header: ({ table: t }) => (
+        <input
+          type="checkbox"
+          className="k2-checkbox"
+          checked={t.getIsAllPageRowsSelected()}
+          ref={(el) => { if (el) el.indeterminate = t.getIsSomePageRowsSelected() }}
+          onChange={t.getToggleAllPageRowsSelectedHandler()}
+        />
+      ),
+      cell: ({ row }) => (
+        <input
+          type="checkbox"
+          className="k2-checkbox"
+          checked={row.getIsSelected()}
+          onChange={row.getToggleSelectedHandler()}
+        />
+      ),
+    }),
     columnHelper.accessor('name', {
       header: 'Name',
       filterFn: operatorFilterFn,
@@ -210,12 +236,14 @@ export default function TanStackClientGridV2({ clients, onEdit, onDelete }: Clie
   const table = useReactTable({
     data: clients,
     columns,
-    state: { sorting, columnFilters, columnSizing, globalFilter, columnOrder },
+    state: { sorting, columnFilters, columnSizing, globalFilter, columnOrder, rowSelection },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnSizingChange: setColumnSizing,
     onGlobalFilterChange: setGlobalFilter,
     onColumnOrderChange: setColumnOrder,
+    onRowSelectionChange: setRowSelection,
+    enableRowSelection: true,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -236,6 +264,12 @@ export default function TanStackClientGridV2({ clients, onEdit, onDelete }: Clie
       <div className="k2-toolbar">
         <div className="k2-toolbar-left">
           <span className="k2-toolbar-label">TanStack Table V2</span>
+          {selectedCount > 0 && (
+            <span className="k2-selected-count">
+              {selectedCount} selected
+              <button className="k2-clear-selection-btn" onClick={() => setRowSelection({})}>×</button>
+            </span>
+          )}
           {sorting.length > 0 && (
             <button className="k2-clear-sort-btn" onClick={() => setSorting([])}>
               Clear sort
@@ -360,7 +394,7 @@ export default function TanStackClientGridV2({ clients, onEdit, onDelete }: Clie
           {/* Body */}
           <tbody>
             {table.getRowModel().rows.map((row, i) => (
-              <tr key={row.id} className={`k2-row ${i % 2 === 1 ? 'k2-alt' : ''}`}>
+              <tr key={row.id} className={`k2-row ${i % 2 === 1 ? 'k2-alt' : ''} ${row.getIsSelected() ? 'k2-selected' : ''}`}>
                 {row.getVisibleCells().map((cell) => (
                   <td key={cell.id} className="k2-cell" style={{ width: cell.column.getSize() }}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
