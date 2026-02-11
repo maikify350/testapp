@@ -1,0 +1,37 @@
+/* Date Picker Styling */
+.k2-date-picker {
+  width: 100%;
+  padding: 0.25rem 0.4rem;
+  border: 1px solid var(--k2-accent);
+  border-radius: 3px;
+  background: var(--k2-bg-input);
+  color: var(--k2-text);
+  font-size: 0.875rem;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  outline: none;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.k2-date-picker:focus {
+  border-color: var(--k2-accent);
+  box-shadow: 0 0 0 2px rgba(var(--k2-accent-rgb), 0.2);
+}
+
+.k2-date-picker::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  filter: invert(0.7);
+}
+
+/* Dark theme support for calendar icon */
+.k2-grid.k2-theme-mocha .k2-date-picker::-webkit-calendar-picker-indicator,
+.k2-grid.k2-theme-mocha-dark .k2-date-picker::-webkit-calendar-picker-indicator,
+.k2-grid.k2-theme-dark-teal .k2-date-picker::-webkit-calendar-picker-indicator,
+.k2-grid.k2-theme-ocean .k2-date-picker::-webkit-calendar-picker-indicator,
+.k2-grid.k2-theme-nordic .k2-date-picker::-webkit-calendar-picker-indicator,
+.k2-grid.k2-theme-emerald .k2-date-picker::-webkit-calendar-picker-indicator,
+.k2-grid.k2-theme-ruby .k2-date-picker::-webkit-calendar-picker-indicator,
+.k2-grid.k2-theme-amber .k2-date-picker::-webkit-calendar-picker-indicator,
+.k2-grid .k2-date-picker::-webkit-calendar-picker-indicator {
+  filter: invert(0.8) brightness(1.2);
+}

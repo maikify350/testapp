@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useRef, useEffect } from 'react'
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import {
   useReactTable,
   getCoreRowModel,
@@ -12,6 +12,7 @@ import type { SortingState, ColumnFiltersState, Column, ColumnSizingState, Colum
 import type { ClientGridProps } from './ClientGridProps'
 import type { Client } from '../types'
 import { FontSelector, FONT_OPTIONS } from './FontSelector'
+import { DatePicker } from './DatePicker'
 import './TanStackClientGridV2.css'
 
 const columnHelper = createColumnHelper<Client>()
@@ -134,6 +135,34 @@ function ColumnFilter({ column }: { column: Column<Client, unknown> }) {
   )
 }
 
+// --- Editable cell component using uncontrolled input ---
+const EditableInput = React.memo(({
+  defaultValue,
+  onValueChange,
+  fieldKey
+}: {
+  defaultValue: string;
+  onValueChange: (field: string, val: string) => void;
+  fieldKey: string;
+}) => {
+  const [localValue, setLocalValue] = useState(defaultValue)
+
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value
+    setLocalValue(newValue)
+    onValueChange(fieldKey, newValue)
+  }, [fieldKey, onValueChange])
+
+  return (
+    <input
+      className="k2-inline-input"
+      value={localValue}
+      onChange={handleChange}
+      autoFocus={fieldKey === 'name'}
+    />
+  )
+})
+
 // --- Custom filter function ---
 function operatorFilterFn(
   row: { getValue: (columnId: string) => unknown },
@@ -175,6 +204,7 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [editingRowId, setEditingRowId] = useState<number | null>(null)
   const [editValues, setEditValues] = useState<Record<string, string>>({})
+  const editValuesRef = useRef<Record<string, string>>({})
   const [nestedView, setNestedView] = useState(false)
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set())
   const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({})
@@ -219,6 +249,18 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
 
   const selectedCount = Object.keys(rowSelection).length
 
+  // Sync ref with state
+  useEffect(() => {
+    editValuesRef.current = editValues
+  }, [editValues])
+
+  // Memoize edit handlers to prevent recreation
+  const handleFieldChange = useCallback((field: string, value: string) => {
+    const newValues = { ...editValuesRef.current, [field]: value }
+    editValuesRef.current = newValues
+    setEditValues(newValues)
+  }, [])
+
   const columns = useMemo(() => [
     columnHelper.display({
       id: 'select',
@@ -249,7 +291,7 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
       size: 160,
       cell: (info) => {
         if (info.row.original.id === editingRowId) {
-          return <input className="k2-inline-input" value={editValues.name ?? ''} onChange={e => setEditValues(v => ({ ...v, name: e.target.value }))} />
+          return <EditableInput defaultValue={editValues.name ?? ''} onValueChange={handleFieldChange} fieldKey="name" />
         }
         return info.getValue()
       },
@@ -260,7 +302,7 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
       size: 220,
       cell: (info) => {
         if (info.row.original.id === editingRowId) {
-          return <input className="k2-inline-input" value={editValues.email ?? ''} onChange={e => setEditValues(v => ({ ...v, email: e.target.value }))} />
+          return <EditableInput defaultValue={editValues.email ?? ''} onValueChange={handleFieldChange} fieldKey="email" />
         }
         return info.getValue()
       },
@@ -271,7 +313,7 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
       size: 150,
       cell: (info) => {
         if (info.row.original.id === editingRowId) {
-          return <input className="k2-inline-input" value={editValues.phone ?? ''} onChange={e => setEditValues(v => ({ ...v, phone: e.target.value }))} />
+          return <EditableInput defaultValue={editValues.phone ?? ''} onValueChange={handleFieldChange} fieldKey="phone" />
         }
         return info.getValue()
       },
@@ -282,7 +324,7 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
       size: 200,
       cell: (info) => {
         if (info.row.original.id === editingRowId) {
-          return <input className="k2-inline-input" value={editValues.company ?? ''} onChange={e => setEditValues(v => ({ ...v, company: e.target.value }))} />
+          return <EditableInput defaultValue={editValues.company ?? ''} onValueChange={handleFieldChange} fieldKey="company" />
         }
         return info.getValue()
       },
@@ -290,8 +332,17 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
     columnHelper.accessor('created_at', {
       header: 'Created',
       filterFn: operatorFilterFn,
-      size: 120,
-      cell: (info) => new Date(info.getValue()).toLocaleDateString(),
+      size: 150,
+      cell: (info) => {
+        if (info.row.original.id === editingRowId) {
+          return <DatePicker defaultValue={editValues.created_at ?? info.getValue()} onValueChange={handleFieldChange} fieldKey="created_at" />
+        }
+        const date = new Date(info.getValue())
+        const day = String(date.getDate()).padStart(2, '0')
+        const month = String(date.getMonth() + 1).padStart(2, '0')
+        const year = date.getFullYear()
+        return `${day}/${month}/${year}`
+      },
     }),
     columnHelper.display({
       id: 'actions',
@@ -304,14 +355,16 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
             <div className="k2-actions">
               <button className="k2-action-btn k2-save" onClick={async () => {
                 if (onSave) {
-                  await onSave({ ...row.original, ...editValues })
+                  await onSave({ ...row.original, ...editValuesRef.current })
                 }
                 setEditingRowId(null)
                 setEditValues({})
+                editValuesRef.current = {}
               }}>Save</button>
               <button className="k2-action-btn k2-cancel" onClick={() => {
                 setEditingRowId(null)
                 setEditValues({})
+                editValuesRef.current = {}
               }}>Cancel</button>
             </div>
           )
@@ -320,19 +373,22 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
           <div className="k2-actions">
             <button className="k2-action-btn k2-edit" onClick={() => {
               setEditingRowId(row.original.id)
-              setEditValues({
+              const initialValues = {
                 name: row.original.name ?? '',
                 email: row.original.email ?? '',
                 phone: row.original.phone ?? '',
                 company: row.original.company ?? '',
-              })
+                created_at: row.original.created_at ?? '',
+              }
+              setEditValues(initialValues)
+              editValuesRef.current = initialValues
             }}>Edit</button>
             <button className="k2-action-btn k2-delete" onClick={() => onDelete(row.original.id)}>Delete</button>
           </div>
         )
       },
     }),
-  ], [onEdit, onSave, onDelete, editingRowId, editValues])
+  ], [onEdit, onSave, onDelete, editingRowId, handleFieldChange])
 
   const table = useReactTable({
     data: clients,
@@ -385,7 +441,13 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
     const groups = new Map<string, typeof rows>()
     for (const row of rows) {
       let val = String(row.getValue(colId) ?? '')
-      if (colId === 'created_at') val = new Date(val).toLocaleDateString()
+      if (colId === 'created_at') {
+        const date = new Date(val)
+        const day = String(date.getDate()).padStart(2, '0')
+        const month = String(date.getMonth() + 1).padStart(2, '0')
+        const year = date.getFullYear()
+        val = `${day}/${month}/${year}`
+      }
       if (!groups.has(val)) groups.set(val, [])
       groups.get(val)!.push(row)
     }

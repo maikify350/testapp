@@ -835,6 +835,12 @@
   background: rgba(var(--k2-accent-rgb), 0.06) !important;
 }
 
+.k2-row.k2-editing .k2-cell {
+  overflow: visible;
+  white-space: normal;
+  max-width: none;
+}
+
 .k2-inline-input {
   width: 100%;
   padding: 0.25rem 0.4rem;
@@ -842,9 +848,13 @@
   border-radius: 3px;
   background: var(--k2-bg-input);
   color: var(--k2-text);
-  font-size: 0.8rem;
+  font-size: 0.875rem;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   outline: none;
   box-sizing: border-box;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
 }
 
 .k2-inline-input:focus {
