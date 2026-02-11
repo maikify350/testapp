@@ -13,6 +13,8 @@ import type { ClientGridProps } from './ClientGridProps'
 import type { Client } from '../types'
 import { FontSelector, FONT_OPTIONS } from './FontSelector'
 import { DatePicker } from './DatePicker'
+import { ColumnMenu } from './ColumnMenu'
+import { exportToCSV, exportToExcel } from './ExportUtils'
 import './TanStackClientGridV2.css'
 
 const columnHelper = createColumnHelper<Client>()
@@ -211,7 +213,7 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
   const [globalFilter, setGlobalFilter] = useState('')
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>([
-    'select', 'name', 'email', 'phone', 'company', 'created_at', 'actions',
+    'select', 'name', 'email', 'phone', 'company', 'address', 'city', 'state', 'zip_code', 'website', 'created_at', 'actions',
   ])
   const [dragOverId, setDragOverId] = useState<string | null>(null)
   const [sortZoneActive, setSortZoneActive] = useState(false)
@@ -226,6 +228,7 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
     const saved = localStorage.getItem('k2-grid-font')
     return saved || FONT_OPTIONS[0].family
   })
+  const [columnMenuState, setColumnMenuState] = useState<{ column: any; position: { x: number; y: number } } | null>(null)
   const dragColumnRef = useRef<string | null>(null)
   const dragSourceRef = useRef<'header' | 'chip' | null>(null)
   const didDragRef = useRef(false)
@@ -244,7 +247,9 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
 
   const COLUMN_LABELS: Record<string, string> = {
     name: 'Name', email: 'Email', phone: 'Phone',
-    company: 'Company', created_at: 'Created',
+    company: 'Company', address: 'Address', city: 'City',
+    state: 'State', zip_code: 'Zip Code', website: 'Website',
+    created_at: 'Created',
   }
 
   const selectedCount = Object.keys(rowSelection).length
@@ -329,6 +334,61 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
         return info.getValue()
       },
     }),
+    columnHelper.accessor('address', {
+      header: 'Address',
+      filterFn: operatorFilterFn,
+      size: 200,
+      cell: (info) => {
+        if (info.row.original.id === editingRowId) {
+          return <EditableInput defaultValue={editValues.address ?? ''} onValueChange={handleFieldChange} fieldKey="address" />
+        }
+        return info.getValue()
+      },
+    }),
+    columnHelper.accessor('city', {
+      header: 'City',
+      filterFn: operatorFilterFn,
+      size: 130,
+      cell: (info) => {
+        if (info.row.original.id === editingRowId) {
+          return <EditableInput defaultValue={editValues.city ?? ''} onValueChange={handleFieldChange} fieldKey="city" />
+        }
+        return info.getValue()
+      },
+    }),
+    columnHelper.accessor('state', {
+      header: 'State',
+      filterFn: operatorFilterFn,
+      size: 100,
+      cell: (info) => {
+        if (info.row.original.id === editingRowId) {
+          return <EditableInput defaultValue={editValues.state ?? ''} onValueChange={handleFieldChange} fieldKey="state" />
+        }
+        return info.getValue()
+      },
+    }),
+    columnHelper.accessor('zip_code', {
+      header: 'Zip Code',
+      filterFn: operatorFilterFn,
+      size: 110,
+      cell: (info) => {
+        if (info.row.original.id === editingRowId) {
+          return <EditableInput defaultValue={editValues.zip_code ?? ''} onValueChange={handleFieldChange} fieldKey="zip_code" />
+        }
+        return info.getValue()
+      },
+    }),
+    columnHelper.accessor('website', {
+      header: 'Website',
+      filterFn: operatorFilterFn,
+      size: 180,
+      cell: (info) => {
+        if (info.row.original.id === editingRowId) {
+          return <EditableInput defaultValue={editValues.website ?? ''} onValueChange={handleFieldChange} fieldKey="website" />
+        }
+        return info.getValue()
+      },
+    }),
     columnHelper.accessor('created_at', {
       header: 'Created',
       filterFn: operatorFilterFn,
@@ -378,6 +438,11 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
                 email: row.original.email ?? '',
                 phone: row.original.phone ?? '',
                 company: row.original.company ?? '',
+                address: row.original.address ?? '',
+                city: row.original.city ?? '',
+                state: row.original.state ?? '',
+                zip_code: row.original.zip_code ?? '',
+                website: row.original.website ?? '',
                 created_at: row.original.created_at ?? '',
               }
               setEditValues(initialValues)
@@ -534,6 +599,20 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
               Clear sort
             </button>
           )}
+          <button
+            className="k2-export-btn"
+            onClick={() => exportToExcel(clients)}
+            title="Export to Excel"
+          >
+            📊 Excel
+          </button>
+          <button
+            className="k2-export-btn"
+            onClick={() => exportToCSV(clients)}
+            title="Export to CSV"
+          >
+            📄 CSV
+          </button>
         </div>
         <div className="k2-toolbar-right">
           <label className="k2-nested-toggle">
@@ -739,6 +818,14 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
                     setDragOverId(null)
                     dragColumnRef.current = null
                   }}
+                  onContextMenu={(e) => {
+                    if (header.column.id === 'select' || header.column.id === 'actions') return
+                    e.preventDefault()
+                    setColumnMenuState({
+                      column: header.column,
+                      position: { x: e.clientX, y: e.clientY }
+                    })
+                  }}
                 >
                   <div
                     className={`k2-header-content ${header.column.getCanSort() ? 'k2-sortable' : ''}`}
@@ -882,6 +969,15 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
           <span>items per page</span>
         </div>
       </div>
+
+      {/* Column Menu */}
+      {columnMenuState && (
+        <ColumnMenu
+          column={columnMenuState.column}
+          position={columnMenuState.position}
+          onClose={() => setColumnMenuState(null)}
+        />
+      )}
     </div>
   )
 }

@@ -4,6 +4,11 @@ export interface Client {
   email: string | null
   phone: string | null
   company: string | null
+  address: string | null
+  city: string | null
+  state: string | null
+  zip_code: string | null
+  website: string | null
   created_at: string
 }
 

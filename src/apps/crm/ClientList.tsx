@@ -121,6 +121,11 @@ function ClientList() {
       email: client.email,
       phone: client.phone,
       company: client.company,
+      address: client.address,
+      city: client.city,
+      state: client.state,
+      zip_code: client.zip_code,
+      website: client.website,
       created_at: client.created_at,
     }
     const { error } = await supabase

@@ -287,6 +287,21 @@
   background: rgba(var(--k2-accent-rgb), 0.25);
 }
 
+.k2-export-btn {
+  padding: 0.2rem 0.5rem;
+  font-size: 0.75rem;
+  background: rgba(46, 213, 115, 0.15);
+  color: #2ed573;
+  border: 1px solid rgba(46, 213, 115, 0.3);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.k2-export-btn:hover {
+  background: rgba(46, 213, 115, 0.25);
+}
+
 .k2-toolbar-right {
   display: flex;
   align-items: center;
