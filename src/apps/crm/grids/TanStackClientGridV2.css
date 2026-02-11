@@ -345,10 +345,10 @@
   z-index: 200;
   min-width: 170px;
   margin-top: 4px;
-  background: var(--k2-bg-alt);
-  border: 1px solid var(--k2-border);
+  background: #ffffff;
+  border: 1px solid #d0d5dd;
   border-radius: 6px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   overflow: hidden;
   padding: 4px 0;
 }
@@ -361,7 +361,7 @@
   padding: 0.45rem 0.75rem;
   background: none;
   border: none;
-  color: var(--k2-text);
+  color: #1e293b;
   font-size: 0.8rem;
   cursor: pointer;
   text-align: left;
@@ -369,11 +369,11 @@
 }
 
 .k2-theme-option:hover {
-  background: var(--k2-bg-hover);
+  background: #f1f5f9;
 }
 
 .k2-theme-option.k2-theme-active {
-  background: rgba(var(--k2-accent-rgb), 0.12);
+  background: #e8f0fe;
   font-weight: 600;
 }
 
@@ -382,12 +382,12 @@
   height: 12px;
   border-radius: 50%;
   flex-shrink: 0;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(0, 0, 0, 0.12);
 }
 
 .k2-theme-check {
   margin-left: auto;
-  color: var(--k2-accent);
+  color: #2563eb;
   font-size: 0.75rem;
 }
 
@@ -557,7 +557,7 @@
   margin-left: 0.35rem;
 }
 
-.k2-nested-data-row > .k2-cell:first-child {
+.k2-nested-data-row > .k2-cell:nth-child(2) {
   padding-left: calc(var(--nest-depth, 0) * 24px + 12px);
 }
 

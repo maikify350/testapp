@@ -17,11 +17,11 @@ const columnHelper = createColumnHelper<Client>()
 
 // --- Theme definitions ---
 const THEMES = [
-  { id: 'default', label: 'Default Dark', color: '#646cff', className: '' },
   { id: 'mocha', label: 'Mocha', color: '#A47148', className: 'k2-theme-mocha' },
   { id: 'mocha-dark', label: 'Mocha Dark', color: '#C4956A', className: 'k2-theme-mocha-dark' },
   { id: 'teal-light', label: 'Teal Light', color: '#0F766E', className: 'k2-theme-teal-light' },
   { id: 'dark-teal', label: 'Dark Teal', color: '#14B8A6', className: 'k2-theme-dark-teal' },
+  { id: 'default', label: 'Default Dark', color: '#646cff', className: '' },
   { id: 'ocean', label: 'Ocean Blue', color: '#0ea5e9', className: 'k2-theme-ocean' },
   { id: 'nordic', label: 'Nordic', color: '#5eead4', className: 'k2-theme-nordic' },
   { id: 'emerald', label: 'Emerald', color: '#10b981', className: 'k2-theme-emerald' },
