@@ -1,0 +1,120 @@
+/* Font Selector Component */
+.k2-font-wrapper {
+  position: relative;
+}
+
+.k2-font-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.6rem;
+  border: 1px solid var(--k2-border);
+  border-radius: 4px;
+  background: var(--k2-bg-input);
+  color: var(--k2-text);
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.2s;
+}
+
+.k2-font-btn:hover {
+  border-color: var(--k2-accent);
+  background: var(--k2-bg-hover);
+}
+
+.k2-font-icon {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--k2-accent);
+}
+
+.k2-font-label {
+  font-weight: 500;
+}
+
+.k2-font-arrow {
+  font-size: 0.6rem;
+  color: var(--k2-text-muted);
+  transition: transform 0.2s;
+}
+
+.k2-font-arrow-open {
+  transform: rotate(180deg);
+}
+
+.k2-font-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 280px;
+  max-height: 400px;
+  overflow-y: auto;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  padding: 0.25rem;
+}
+
+.k2-font-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  width: 100%;
+  padding: 0.6rem;
+  border: none;
+  background: transparent;
+  color: #1f2937;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+
+.k2-font-option:hover {
+  background: #f3f4f6;
+}
+
+.k2-font-option-active {
+  background: #eff6ff;
+}
+
+.k2-font-option-active:hover {
+  background: #dbeafe;
+}
+
+.k2-font-option-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.k2-font-option-name {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #111827;
+}
+
+.k2-font-option-check {
+  color: #3b82f6;
+  font-weight: bold;
+}
+
+.k2-font-option-desc {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.k2-font-option-preview {
+  font-size: 0.75rem;
+  color: #4b5563;
+  padding: 0.35rem 0.5rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 3px;
+  width: 100%;
+  margin-top: 0.25rem;
+}

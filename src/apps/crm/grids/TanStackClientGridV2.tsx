@@ -11,6 +11,7 @@ import {
 import type { SortingState, ColumnFiltersState, Column, ColumnSizingState, ColumnOrderState, RowSelectionState } from '@tanstack/react-table'
 import type { ClientGridProps } from './ClientGridProps'
 import type { Client } from '../types'
+import { FontSelector, FONT_OPTIONS } from './FontSelector'
 import './TanStackClientGridV2.css'
 
 const columnHelper = createColumnHelper<Client>()
@@ -191,6 +192,10 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
   })
   const [showThemeMenu, setShowThemeMenu] = useState(false)
   const themeRef = useRef<HTMLDivElement>(null)
+  const [fontFamily, setFontFamily] = useState(() => {
+    const saved = localStorage.getItem('k2-grid-font')
+    return saved || FONT_OPTIONS[0].family
+  })
   const dragColumnRef = useRef<string | null>(null)
   const dragSourceRef = useRef<'header' | 'chip' | null>(null)
   const didDragRef = useRef(false)
@@ -448,7 +453,10 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
   }
 
   return (
-    <div className={`k2-grid ${theme.className}`}>
+    <div
+      className={`k2-grid ${theme.className}`}
+      style={{ '--k2-font-family': fontFamily } as React.CSSProperties}
+    >
       {/* Toolbar */}
       <div className="k2-toolbar">
         <div className="k2-toolbar-left">
@@ -480,6 +488,13 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
             placeholder="Search all columns..."
             value={globalFilter}
             onChange={(e) => setGlobalFilter(e.target.value)}
+          />
+          <FontSelector
+            currentFont={fontFamily}
+            onFontChange={(font) => {
+              setFontFamily(font)
+              localStorage.setItem('k2-grid-font', font)
+            }}
           />
           <div className="k2-theme-wrapper" ref={themeRef}>
             <button

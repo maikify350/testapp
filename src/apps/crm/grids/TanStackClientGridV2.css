@@ -821,6 +821,9 @@
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 0;
+  font-family: var(--k2-font-family, 'JetBrains Mono', monospace);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .k2-cell:last-child {
