@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **IMPORTANT:** After completing any coding task, ALWAYS end your final message with:
 
 ========================================
-✓ DONE CODING, READY TO TEST!
+✓ *DONE* CODING, READY TO TEST!
 ========================================
 
 This signals to the user that the implementation is complete and ready for testing.
