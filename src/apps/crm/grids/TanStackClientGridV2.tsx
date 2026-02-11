@@ -13,6 +13,7 @@ import type { ClientGridProps } from './ClientGridProps'
 import type { Client } from '../types'
 import { FontSelector, FONT_OPTIONS } from './FontSelector'
 import { DatePicker } from './DatePicker'
+import { StatePicker } from './StatePicker'
 import { ColumnMenu } from './ColumnMenu'
 import { ColumnManager, type ColumnConfig } from './ColumnManager'
 import { exportToCSV, exportToExcel } from './ExportUtils'
@@ -358,7 +359,19 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
         if (info.row.original.id === editingRowId) {
           return <EditableInput defaultValue={editValues.email ?? ''} onValueChange={handleFieldChange} fieldKey="email" />
         }
-        return info.getValue()
+        const email = info.getValue()
+        if (email) {
+          return (
+            <a
+              href={`mailto:${email}`}
+              className="k2-email-link"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {email}
+            </a>
+          )
+        }
+        return null
       },
     }),
     columnHelper.accessor('phone', {
@@ -411,7 +424,7 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
       size: 100,
       cell: (info) => {
         if (info.row.original.id === editingRowId) {
-          return <EditableInput defaultValue={editValues.state ?? ''} onValueChange={handleFieldChange} fieldKey="state" />
+          return <StatePicker defaultValue={editValues.state ?? ''} onValueChange={handleFieldChange} fieldKey="state" />
         }
         return info.getValue()
       },
@@ -435,7 +448,22 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
         if (info.row.original.id === editingRowId) {
           return <EditableInput defaultValue={editValues.website ?? ''} onValueChange={handleFieldChange} fieldKey="website" />
         }
-        return info.getValue()
+        const url = info.getValue()
+        if (url) {
+          const href = url.startsWith('http://') || url.startsWith('https://') ? url : `https://${url}`
+          return (
+            <a
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="k2-website-link"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {url}
+            </a>
+          )
+        }
+        return null
       },
     }),
     columnHelper.accessor('created_at', {

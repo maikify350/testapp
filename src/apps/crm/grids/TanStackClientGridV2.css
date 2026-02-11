@@ -1068,8 +1068,44 @@
 }
 
 .k2-grid-fullwidth {
-  width: 100vw !important;
-  max-width: 100vw !important;
-  margin-left: calc(-50vw + 50%);
-  margin-right: calc(-50vw + 50%);
+  position: relative;
+  left: 0;
+  right: 0;
+  width: calc(100vw - 70px) !important;
+  max-width: calc(100vw - 70px) !important;
+  margin-left: 4px !important;
+  margin-right: 4px !important;
+  box-sizing: border-box;
+}
+
+/* --- Website Link --- */
+.k2-website-link {
+  color: #3b82f6;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.k2-website-link:hover {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.k2-website-link:visited {
+  color: #7c3aed;
+}
+
+/* --- Email Link --- */
+.k2-email-link {
+  color: #0891b2;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.k2-email-link:hover {
+  color: #0e7490;
+  text-decoration: underline;
+}
+
+.k2-email-link:visited {
+  color: #6366f1;
 }
