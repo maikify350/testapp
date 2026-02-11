@@ -2,6 +2,14 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Completion Signal
+
+**IMPORTANT:** After completing any coding task, ALWAYS end your final message with:
+
+👍👍👍 Done coding, READY to test!
+
+This signals to the user that the implementation is complete and ready for testing.
+
 ## Commands
 
 - `npm run dev` — Start Vite dev server (hot reload)

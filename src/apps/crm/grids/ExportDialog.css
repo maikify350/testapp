@@ -1,0 +1,162 @@
+/* Export Dialog */
+.k2-export-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+}
+
+.k2-export-dialog {
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  width: 400px;
+  max-width: 90vw;
+}
+
+.k2-export-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.k2-export-dialog-header h3 {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.k2-export-dialog-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+
+.k2-export-dialog-close:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.k2-export-dialog-options {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.k2-export-row-limit {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.k2-export-row-limit label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.k2-export-row-input {
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  width: 100%;
+  max-width: 150px;
+}
+
+.k2-export-row-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.k2-export-row-info {
+  font-size: 0.8rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.k2-export-headers-option {
+  margin-top: 0.75rem;
+}
+
+.k2-export-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: #374151;
+}
+
+.k2-export-checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.k2-export-dialog-body {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.k2-export-option {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: left;
+  width: 100%;
+}
+
+.k2-export-option:hover {
+  background: #f9fafb;
+  border-color: #3b82f6;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+}
+
+.k2-export-icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.k2-export-option-text {
+  flex: 1;
+}
+
+.k2-export-option-title {
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 0.25rem;
+}
+
+.k2-export-option-desc {
+  font-size: 0.875rem;
+  color: #6b7280;
+}

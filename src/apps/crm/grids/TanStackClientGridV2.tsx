@@ -16,7 +16,8 @@ import { DatePicker } from './DatePicker'
 import { StatePicker } from './StatePicker'
 import { ColumnMenu } from './ColumnMenu'
 import { ColumnManager, type ColumnConfig } from './ColumnManager'
-import { exportToCSV, exportToExcel } from './ExportUtils'
+import { ExportDialog } from './ExportDialog'
+import { exportToCSV, exportToExcel, exportToPDF, exportToJSON, exportToXML } from './ExportUtils'
 import './TanStackClientGridV2.css'
 
 const columnHelper = createColumnHelper<Client>()
@@ -226,6 +227,7 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
     return saved ? JSON.parse(saved) : {}
   })
   const [showColumnManager, setShowColumnManager] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
   const [dragOverId, setDragOverId] = useState<string | null>(null)
   const [sortZoneActive, setSortZoneActive] = useState(false)
   const [sortChipDragOver, setSortChipDragOver] = useState<string | null>(null)
@@ -739,17 +741,10 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
           )}
           <button
             className="k2-export-btn"
-            onClick={() => exportToExcel(clients, columnOrder, columnVisibility)}
-            title="Export to Excel"
+            onClick={() => setShowExportDialog(true)}
+            title="Export data"
           >
-            📊 Excel
-          </button>
-          <button
-            className="k2-export-btn"
-            onClick={() => exportToCSV(clients, columnOrder, columnVisibility)}
-            title="Export to CSV"
-          >
-            📄 CSV
+            📤 Export...
           </button>
           <button
             className="k2-column-manager-btn"
@@ -1163,6 +1158,19 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
           onApply={handleApplyColumns}
           onReset={handleResetColumns}
           onClose={() => setShowColumnManager(false)}
+        />
+      )}
+
+      {/* Export Dialog */}
+      {showExportDialog && (
+        <ExportDialog
+          totalRows={clients.length}
+          onClose={() => setShowExportDialog(false)}
+          onExportExcel={(rowLimit, excludeHeaders) => exportToExcel(clients, columnOrder, columnVisibility, rowLimit, excludeHeaders)}
+          onExportCSV={(rowLimit, excludeHeaders) => exportToCSV(clients, columnOrder, columnVisibility, rowLimit, excludeHeaders)}
+          onExportPDF={(rowLimit, excludeHeaders) => exportToPDF(clients, columnOrder, columnVisibility, rowLimit, excludeHeaders)}
+          onExportJSON={(rowLimit, excludeHeaders) => exportToJSON(clients, columnOrder, columnVisibility, rowLimit, excludeHeaders)}
+          onExportXML={(rowLimit, excludeHeaders) => exportToXML(clients, columnOrder, columnVisibility, rowLimit, excludeHeaders)}
         />
       )}
     </div>
