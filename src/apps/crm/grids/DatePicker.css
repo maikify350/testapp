@@ -1,7 +1,15 @@
 /* Date Picker Styling */
-.k2-date-picker {
+.k2-date-picker-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
   width: 100%;
+}
+
+.k2-date-picker {
+  flex: 1;
   padding: 0.25rem 0.4rem;
+  padding-right: 2rem;
   border: 1px solid var(--k2-accent);
   border-radius: 3px;
   background: var(--k2-bg-input);
@@ -18,20 +26,27 @@
   box-shadow: 0 0 0 2px rgba(var(--k2-accent-rgb), 0.2);
 }
 
+/* Hide native calendar icon */
 .k2-date-picker::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  position: absolute;
+  right: 0;
+  width: 2rem;
+  height: 100%;
   cursor: pointer;
-  filter: invert(0.7);
 }
 
-/* Dark theme support for calendar icon */
-.k2-grid.k2-theme-mocha .k2-date-picker::-webkit-calendar-picker-indicator,
-.k2-grid.k2-theme-mocha-dark .k2-date-picker::-webkit-calendar-picker-indicator,
-.k2-grid.k2-theme-dark-teal .k2-date-picker::-webkit-calendar-picker-indicator,
-.k2-grid.k2-theme-ocean .k2-date-picker::-webkit-calendar-picker-indicator,
-.k2-grid.k2-theme-nordic .k2-date-picker::-webkit-calendar-picker-indicator,
-.k2-grid.k2-theme-emerald .k2-date-picker::-webkit-calendar-picker-indicator,
-.k2-grid.k2-theme-ruby .k2-date-picker::-webkit-calendar-picker-indicator,
-.k2-grid.k2-theme-amber .k2-date-picker::-webkit-calendar-picker-indicator,
-.k2-grid .k2-date-picker::-webkit-calendar-picker-indicator {
-  filter: invert(0.8) brightness(1.2);
+/* Custom calendar icon */
+.k2-date-icon {
+  position: absolute;
+  right: 0.5rem;
+  pointer-events: none;
+  color: var(--k2-accent);
+  opacity: 0.8;
+}
+
+.k2-date-picker:hover + .k2-date-icon,
+.k2-date-picker:focus + .k2-date-icon {
+  opacity: 1;
+  color: var(--k2-accent);
 }
