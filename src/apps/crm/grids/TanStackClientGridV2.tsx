@@ -14,6 +14,7 @@ import type { Client } from '../types'
 import { FontSelector, FONT_OPTIONS } from './FontSelector'
 import { DatePicker } from './DatePicker'
 import { ColumnMenu } from './ColumnMenu'
+import { ColumnManager, type ColumnConfig } from './ColumnManager'
 import { exportToCSV, exportToExcel } from './ExportUtils'
 import './TanStackClientGridV2.css'
 
@@ -212,9 +213,18 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
   const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({})
   const [globalFilter, setGlobalFilter] = useState('')
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
-  const [columnOrder, setColumnOrder] = useState<ColumnOrderState>([
+  const defaultColumnOrder: ColumnOrderState = [
     'select', 'name', 'email', 'phone', 'company', 'address', 'city', 'state', 'zip_code', 'website', 'created_at', 'actions',
-  ])
+  ]
+  const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(() => {
+    const saved = localStorage.getItem('k2-grid-column-order')
+    return saved ? JSON.parse(saved) : defaultColumnOrder
+  })
+  const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>(() => {
+    const saved = localStorage.getItem('k2-grid-column-visibility')
+    return saved ? JSON.parse(saved) : {}
+  })
+  const [showColumnManager, setShowColumnManager] = useState(false)
   const [dragOverId, setDragOverId] = useState<string | null>(null)
   const [sortZoneActive, setSortZoneActive] = useState(false)
   const [sortChipDragOver, setSortChipDragOver] = useState<string | null>(null)
@@ -229,6 +239,14 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
     return saved || FONT_OPTIONS[0].family
   })
   const [columnMenuState, setColumnMenuState] = useState<{ column: any; position: { x: number; y: number } } | null>(null)
+  const [pageSize, setPageSize] = useState(() => {
+    const saved = localStorage.getItem('k2-grid-pagesize')
+    return saved ? parseInt(saved, 10) : 50
+  })
+  const [fullWidth, setFullWidth] = useState(() => {
+    const saved = localStorage.getItem('k2-grid-fullwidth')
+    return saved === 'true'
+  })
   const dragColumnRef = useRef<string | null>(null)
   const dragSourceRef = useRef<'header' | 'chip' | null>(null)
   const didDragRef = useRef(false)
@@ -265,6 +283,37 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
     editValuesRef.current = newValues
     setEditValues(newValues)
   }, [])
+
+  const handleApplyColumns = useCallback((cols: ColumnConfig[]) => {
+    // Update column order
+    const newOrder = cols.map(c => c.id)
+    setColumnOrder(newOrder)
+    localStorage.setItem('k2-grid-column-order', JSON.stringify(newOrder))
+
+    // Update column visibility
+    const newVisibility: Record<string, boolean> = {}
+    cols.forEach(col => {
+      if (!col.locked) {
+        newVisibility[col.id] = col.visible
+      }
+    })
+    setColumnVisibility(newVisibility)
+    localStorage.setItem('k2-grid-column-visibility', JSON.stringify(newVisibility))
+
+    // Remove hidden columns from sorting
+    setSorting(prev => prev.filter(s => {
+      const col = cols.find(c => c.id === s.id)
+      return col && col.visible
+    }))
+  }, [])
+
+  const handleResetColumns = useCallback(() => {
+    setColumnOrder(defaultColumnOrder)
+    setColumnVisibility({})
+    localStorage.removeItem('k2-grid-column-order')
+    localStorage.removeItem('k2-grid-column-visibility')
+    setSorting([])
+  }, [defaultColumnOrder])
 
   const columns = useMemo(() => [
     columnHelper.display({
@@ -458,13 +507,14 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
   const table = useReactTable({
     data: clients,
     columns,
-    state: { sorting, columnFilters, columnSizing, globalFilter, columnOrder, rowSelection },
+    state: { sorting, columnFilters, columnSizing, globalFilter, columnOrder, rowSelection, columnVisibility },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnSizingChange: setColumnSizing,
     onGlobalFilterChange: setGlobalFilter,
     onColumnOrderChange: setColumnOrder,
     onRowSelectionChange: setRowSelection,
+    onColumnVisibilityChange: setColumnVisibility,
     enableRowSelection: true,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -472,13 +522,13 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
     getPaginationRowModel: getPaginationRowModel(),
     enableMultiSort: true,
     columnResizeMode: 'onChange',
-    initialState: { pagination: { pageSize: 50 } },
+    initialState: { pagination: { pageSize } },
   })
 
-  const { pageIndex, pageSize } = table.getState().pagination
+  const { pageIndex, pageSize: currentPageSize } = table.getState().pagination
   const totalFiltered = table.getFilteredRowModel().rows.length
-  const rangeStart = pageIndex * pageSize + 1
-  const rangeEnd = Math.min((pageIndex + 1) * pageSize, totalFiltered)
+  const rangeStart = pageIndex * currentPageSize + 1
+  const rangeEnd = Math.min((pageIndex + 1) * currentPageSize, totalFiltered)
 
   // --- Grouping logic for nested view ---
   type GroupNode = {
@@ -581,7 +631,7 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
 
   return (
     <div
-      className={`k2-grid ${theme.className}`}
+      className={`k2-grid ${theme.className} ${fullWidth ? 'k2-grid-fullwidth' : ''}`}
       style={{ '--k2-font-family': fontFamily } as React.CSSProperties}
     >
       {/* Toolbar */}
@@ -612,6 +662,24 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
             title="Export to CSV"
           >
             📄 CSV
+          </button>
+          <button
+            className="k2-column-manager-btn"
+            onClick={() => setShowColumnManager(true)}
+            title="Manage Columns"
+          >
+            ☰
+          </button>
+          <button
+            className={`k2-fullwidth-btn ${fullWidth ? 'k2-fullwidth-active' : ''}`}
+            onClick={() => {
+              const newValue = !fullWidth
+              setFullWidth(newValue)
+              localStorage.setItem('k2-grid-fullwidth', String(newValue))
+            }}
+            title={fullWidth ? "Normal Width" : "Full Width"}
+          >
+            ⇔
           </button>
         </div>
         <div className="k2-toolbar-right">
@@ -959,8 +1027,13 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
           <span>{rangeStart} - {rangeEnd} of {totalFiltered} items</span>
           <select
             className="k2-pager-size"
-            value={pageSize}
-            onChange={(e) => table.setPageSize(Number(e.target.value))}
+            value={currentPageSize}
+            onChange={(e) => {
+              const newSize = Number(e.target.value)
+              setPageSize(newSize)
+              table.setPageSize(newSize)
+              localStorage.setItem('k2-grid-pagesize', String(newSize))
+            }}
           >
             {[20, 50, 100, 200].map((size) => (
               <option key={size} value={size}>{size}</option>
@@ -976,6 +1049,21 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
           column={columnMenuState.column}
           position={columnMenuState.position}
           onClose={() => setColumnMenuState(null)}
+        />
+      )}
+
+      {/* Column Manager */}
+      {showColumnManager && (
+        <ColumnManager
+          columns={columnOrder.map(id => ({
+            id,
+            label: COLUMN_LABELS[id] || id.charAt(0).toUpperCase() + id.slice(1),
+            visible: columnVisibility[id] !== false,
+            locked: id === 'select' || id === 'actions',
+          }))}
+          onApply={handleApplyColumns}
+          onReset={handleResetColumns}
+          onClose={() => setShowColumnManager(false)}
         />
       )}
     </div>

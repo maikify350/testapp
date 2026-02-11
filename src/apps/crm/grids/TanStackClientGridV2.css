@@ -302,6 +302,22 @@
   background: rgba(46, 213, 115, 0.25);
 }
 
+.k2-column-manager-btn {
+  padding: 0.2rem 0.6rem;
+  font-size: 1rem;
+  background: var(--k2-bg-input);
+  color: var(--k2-text-header);
+  border: 1px solid var(--k2-border);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-weight: 600;
+}
+
+.k2-column-manager-btn:hover {
+  background: var(--k2-bg-hover);
+}
+
 .k2-toolbar-right {
   display: flex;
   align-items: center;
@@ -633,6 +649,22 @@
 
 .k2-header-cell:last-child {
   border-right: none;
+}
+
+/* Hide any stray text in select column header */
+.k2-header-cell:first-child .k2-header-text {
+  font-size: 0;
+  line-height: 0;
+}
+
+.k2-header-cell:first-child .k2-checkbox {
+  font-size: initial;
+}
+
+/* Remove text-overflow ellipsis from select column cells */
+.k2-row .k2-cell:first-child {
+  overflow: visible;
+  text-overflow: clip;
 }
 
 .k2-header-content {
@@ -1010,4 +1042,34 @@
   border-radius: 3px;
   color: var(--k2-text);
   font-size: 0.8rem;
+}
+
+/* --- Full Width Toggle --- */
+.k2-fullwidth-btn {
+  padding: 0.2rem 0.6rem;
+  font-size: 1rem;
+  background: var(--k2-bg-input);
+  color: var(--k2-text-header);
+  border: 1px solid var(--k2-border);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 600;
+}
+
+.k2-fullwidth-btn:hover {
+  background: var(--k2-bg-hover);
+}
+
+.k2-fullwidth-btn.k2-fullwidth-active {
+  background: var(--k2-accent);
+  color: #ffffff;
+  border-color: var(--k2-accent);
+}
+
+.k2-grid-fullwidth {
+  width: 100vw !important;
+  max-width: 100vw !important;
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
 }
