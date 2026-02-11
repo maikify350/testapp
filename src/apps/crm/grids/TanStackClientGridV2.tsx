@@ -248,6 +248,7 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
     const saved = localStorage.getItem('k2-grid-fullwidth')
     return saved === 'true'
   })
+  const [focusedRowIndex, setFocusedRowIndex] = useState<number>(-1)
   const dragColumnRef = useRef<string | null>(null)
   const dragSourceRef = useRef<'header' | 'chip' | null>(null)
   const didDragRef = useRef(false)
@@ -263,6 +264,51 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [showThemeMenu])
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if user is typing in an input/select/textarea
+      const target = e.target as HTMLElement
+      if (target.tagName === 'INPUT' || target.tagName === 'SELECT' || target.tagName === 'TEXTAREA') {
+        return
+      }
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault()
+        setFocusedRowIndex(prev => {
+          const rowCount = document.querySelectorAll('[data-row-index]').length
+          const next = prev < rowCount - 1 ? prev + 1 : prev
+          // Scroll focused row into view
+          setTimeout(() => {
+            const rowEl = document.querySelector(`[data-row-index="${next}"]`)
+            if (rowEl) rowEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+          }, 0)
+          return next
+        })
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault()
+        setFocusedRowIndex(prev => {
+          const next = prev > 0 ? prev - 1 : 0
+          // Scroll focused row into view
+          setTimeout(() => {
+            const rowEl = document.querySelector(`[data-row-index="${next}"]`)
+            if (rowEl) rowEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+          }, 0)
+          return next
+        })
+      } else if (e.key === 'Enter') {
+        e.preventDefault()
+        const rowEl = document.querySelector(`[data-row-index="${focusedRowIndex}"]`) as HTMLElement
+        if (rowEl) {
+          rowEl.dispatchEvent(new Event('dblclick', { bubbles: true }))
+        }
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [focusedRowIndex])
 
   const COLUMN_LABELS: Record<string, string> = {
     name: 'Name', email: 'Email', phone: 'Phone',
@@ -283,6 +329,24 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
     const newValues = { ...editValuesRef.current, [field]: value }
     editValuesRef.current = newValues
     setEditValues(newValues)
+  }, [])
+
+  const handleStartEdit = useCallback((row: typeof clients[0]) => {
+    setEditingRowId(row.id)
+    const initialValues = {
+      name: row.name ?? '',
+      email: row.email ?? '',
+      phone: row.phone ?? '',
+      company: row.company ?? '',
+      address: row.address ?? '',
+      city: row.city ?? '',
+      state: row.state ?? '',
+      zip_code: row.zip_code ?? '',
+      website: row.website ?? '',
+      created_at: row.created_at ?? '',
+    }
+    setEditValues(initialValues)
+    editValuesRef.current = initialValues
   }, [])
 
   const handleApplyColumns = useCallback((cols: ColumnConfig[]) => {
@@ -508,23 +572,7 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
         }
         return (
           <div className="k2-actions">
-            <button className="k2-action-btn k2-edit" onClick={() => {
-              setEditingRowId(row.original.id)
-              const initialValues = {
-                name: row.original.name ?? '',
-                email: row.original.email ?? '',
-                phone: row.original.phone ?? '',
-                company: row.original.company ?? '',
-                address: row.original.address ?? '',
-                city: row.original.city ?? '',
-                state: row.original.state ?? '',
-                zip_code: row.original.zip_code ?? '',
-                website: row.original.website ?? '',
-                created_at: row.original.created_at ?? '',
-              }
-              setEditValues(initialValues)
-              editValuesRef.current = initialValues
-            }}>Edit</button>
+            <button className="k2-action-btn k2-edit" onClick={() => handleStartEdit(row.original)}>Edit</button>
             <button className="k2-action-btn k2-delete" onClick={() => onDelete(row.original.id)}>Delete</button>
           </div>
         )
@@ -642,8 +690,15 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
         const i = rowIndex.value++
         const row = node.row
         result.push(
-          <tr key={row.id} className={`k2-row ${i % 2 === 1 ? 'k2-alt' : ''} ${row.getIsSelected() ? 'k2-selected' : ''} ${row.original.id === editingRowId ? 'k2-editing' : ''} k2-nested-data-row`}
-            style={{ ['--nest-depth' as string]: sorting.length }}
+          <tr
+            key={row.id}
+            className={`k2-row ${i % 2 === 1 ? 'k2-alt' : ''} ${row.getIsSelected() ? 'k2-selected' : ''} ${row.original.id === editingRowId ? 'k2-editing' : ''} k2-nested-data-row`}
+            style={{ ['--nest-depth' as string]: sorting.length, cursor: editingRowId === row.original.id ? 'default' : 'pointer' }}
+            onDoubleClick={() => {
+              if (editingRowId !== row.original.id) {
+                handleStartEdit(row.original)
+              }
+            }}
           >
             {row.getVisibleCells().map((cell) => (
               <td key={cell.id} className="k2-cell" style={{ width: cell.column.getSize() }}>
@@ -677,16 +732,21 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
               Clear sort
             </button>
           )}
+          {columnFilters.length > 0 && (
+            <button className="k2-clear-filters-btn" onClick={() => setColumnFilters([])}>
+              Clear filters
+            </button>
+          )}
           <button
             className="k2-export-btn"
-            onClick={() => exportToExcel(clients)}
+            onClick={() => exportToExcel(clients, columnOrder, columnVisibility)}
             title="Export to Excel"
           >
             📊 Excel
           </button>
           <button
             className="k2-export-btn"
-            onClick={() => exportToCSV(clients)}
+            onClick={() => exportToCSV(clients, columnOrder, columnVisibility)}
             title="Export to CSV"
           >
             📄 CSV
@@ -983,7 +1043,18 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
               )
             ) : (
               table.getRowModel().rows.map((row, i) => (
-                <tr key={row.id} className={`k2-row ${i % 2 === 1 ? 'k2-alt' : ''} ${row.getIsSelected() ? 'k2-selected' : ''} ${row.original.id === editingRowId ? 'k2-editing' : ''}`}>
+                <tr
+                  key={row.id}
+                  data-row-index={i}
+                  className={`k2-row ${i % 2 === 1 ? 'k2-alt' : ''} ${row.getIsSelected() ? 'k2-selected' : ''} ${row.original.id === editingRowId ? 'k2-editing' : ''} ${focusedRowIndex === i ? 'k2-focused' : ''}`}
+                  onDoubleClick={() => {
+                    if (editingRowId !== row.original.id) {
+                      handleStartEdit(row.original)
+                    }
+                  }}
+                  onClick={() => setFocusedRowIndex(i)}
+                  style={{ cursor: editingRowId === row.original.id ? 'default' : 'pointer' }}
+                >
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id} className="k2-cell" style={{ width: cell.column.getSize() }}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}

@@ -287,6 +287,21 @@
   background: rgba(var(--k2-accent-rgb), 0.25);
 }
 
+.k2-clear-filters-btn {
+  padding: 0.2rem 0.5rem;
+  font-size: 0.75rem;
+  background: rgba(var(--k2-accent-rgb), 0.15);
+  color: var(--k2-accent);
+  border: 1px solid rgba(var(--k2-accent-rgb), 0.3);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.k2-clear-filters-btn:hover {
+  background: rgba(var(--k2-accent-rgb), 0.25);
+}
+
 .k2-export-btn {
   padding: 0.2rem 0.5rem;
   font-size: 0.75rem;
@@ -890,6 +905,11 @@
 /* --- Inline editing --- */
 .k2-row.k2-editing {
   background: rgba(var(--k2-accent-rgb), 0.06) !important;
+}
+
+.k2-row.k2-focused {
+  outline: 2px solid var(--k2-accent);
+  outline-offset: -2px;
 }
 
 .k2-row.k2-editing .k2-cell {

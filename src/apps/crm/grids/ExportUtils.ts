@@ -1,26 +1,44 @@
 import type { Client } from '../types';
 
-export function exportToCSV(data: Client[], filename: string = 'clients.csv') {
-  // Define column headers
-  const headers = [
-    'ID', 'Name', 'Email', 'Phone', 'Company', 'Address',
-    'City', 'State', 'Zip Code', 'Website', 'Created'
-  ];
+const COLUMN_LABELS: Record<string, string> = {
+  name: 'Name',
+  email: 'Email',
+  phone: 'Phone',
+  company: 'Company',
+  address: 'Address',
+  city: 'City',
+  state: 'State',
+  zip_code: 'Zip Code',
+  website: 'Website',
+  created_at: 'Created',
+};
 
-  // Convert data to CSV rows
-  const rows = data.map(client => [
-    client.id,
-    client.name,
-    client.email || '',
-    client.phone || '',
-    client.company || '',
-    client.address || '',
-    client.city || '',
-    client.state || '',
-    client.zip_code || '',
-    client.website || '',
-    new Date(client.created_at).toLocaleDateString('en-US')
-  ]);
+function getColumnValue(client: Client, columnId: string): string | number {
+  if (columnId === 'created_at') {
+    return new Date(client.created_at).toLocaleDateString('en-US');
+  }
+  const value = client[columnId as keyof Client];
+  return value ?? '';
+}
+
+export function exportToCSV(
+  data: Client[],
+  columnOrder: string[],
+  columnVisibility: Record<string, boolean>,
+  filename: string = 'clients.csv'
+) {
+  // Filter to visible columns only (excluding select and actions)
+  const visibleColumns = columnOrder.filter(
+    col => col !== 'select' && col !== 'actions' && columnVisibility[col] !== false
+  );
+
+  // Get headers for visible columns
+  const headers = visibleColumns.map(col => COLUMN_LABELS[col] || col);
+
+  // Convert data to CSV rows with only visible columns in order
+  const rows = data.map(client =>
+    visibleColumns.map(col => getColumnValue(client, col))
+  );
 
   // Escape fields that contain commas, quotes, or newlines
   const escapeField = (field: string | number): string => {
@@ -51,29 +69,28 @@ export function exportToCSV(data: Client[], filename: string = 'clients.csv') {
   URL.revokeObjectURL(url);
 }
 
-export function exportToExcel(data: Client[], filename: string = 'clients.xlsx') {
+export function exportToExcel(
+  data: Client[],
+  columnOrder: string[],
+  columnVisibility: Record<string, boolean>,
+  filename: string = 'clients.xlsx'
+) {
   // For Excel, we'll create an HTML table and download it as .xls
   // This is a simple approach that works without external libraries
   // Modern Excel can open HTML tables saved with .xls extension
 
-  const headers = [
-    'ID', 'Name', 'Email', 'Phone', 'Company', 'Address',
-    'City', 'State', 'Zip Code', 'Website', 'Created'
-  ];
+  // Filter to visible columns only (excluding select and actions)
+  const visibleColumns = columnOrder.filter(
+    col => col !== 'select' && col !== 'actions' && columnVisibility[col] !== false
+  );
 
-  const rows = data.map(client => [
-    client.id,
-    client.name,
-    client.email || '',
-    client.phone || '',
-    client.company || '',
-    client.address || '',
-    client.city || '',
-    client.state || '',
-    client.zip_code || '',
-    client.website || '',
-    new Date(client.created_at).toLocaleDateString('en-US')
-  ]);
+  // Get headers for visible columns
+  const headers = visibleColumns.map(col => COLUMN_LABELS[col] || col);
+
+  // Convert data to rows with only visible columns in order
+  const rows = data.map(client =>
+    visibleColumns.map(col => getColumnValue(client, col))
+  );
 
   // Build HTML table
   let htmlContent = `
