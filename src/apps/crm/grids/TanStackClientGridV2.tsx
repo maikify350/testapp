@@ -15,6 +15,21 @@ import './TanStackClientGridV2.css'
 
 const columnHelper = createColumnHelper<Client>()
 
+// --- Theme definitions ---
+const THEMES = [
+  { id: 'default', label: 'Default Dark', color: '#646cff', className: '' },
+  { id: 'mocha', label: 'Mocha', color: '#A47148', className: 'k2-theme-mocha' },
+  { id: 'mocha-dark', label: 'Mocha Dark', color: '#C4956A', className: 'k2-theme-mocha-dark' },
+  { id: 'teal-light', label: 'Teal Light', color: '#0F766E', className: 'k2-theme-teal-light' },
+  { id: 'dark-teal', label: 'Dark Teal', color: '#14B8A6', className: 'k2-theme-dark-teal' },
+  { id: 'ocean', label: 'Ocean Blue', color: '#0ea5e9', className: 'k2-theme-ocean' },
+  { id: 'nordic', label: 'Nordic', color: '#5eead4', className: 'k2-theme-nordic' },
+  { id: 'emerald', label: 'Emerald', color: '#10b981', className: 'k2-theme-emerald' },
+  { id: 'ruby', label: 'Ruby', color: '#f43f5e', className: 'k2-theme-ruby' },
+  { id: 'amber', label: 'Amber', color: '#f59e0b', className: 'k2-theme-amber' },
+  { id: 'light', label: 'Light', color: '#4f46e5', className: 'k2-theme-light' },
+]
+
 // --- Debounced input for filter fields ---
 function DebouncedInput({
   value: initialValue,
@@ -170,9 +185,27 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
   const [dragOverId, setDragOverId] = useState<string | null>(null)
   const [sortZoneActive, setSortZoneActive] = useState(false)
   const [sortChipDragOver, setSortChipDragOver] = useState<string | null>(null)
+  const [theme, setTheme] = useState(() => {
+    const saved = localStorage.getItem('k2-grid-theme')
+    return THEMES.find(t => t.id === saved) ?? THEMES[0]
+  })
+  const [showThemeMenu, setShowThemeMenu] = useState(false)
+  const themeRef = useRef<HTMLDivElement>(null)
   const dragColumnRef = useRef<string | null>(null)
   const dragSourceRef = useRef<'header' | 'chip' | null>(null)
   const didDragRef = useRef(false)
+
+  // Close theme dropdown on outside click
+  useEffect(() => {
+    if (!showThemeMenu) return
+    const handler = (e: MouseEvent) => {
+      if (themeRef.current && !themeRef.current.contains(e.target as Node)) {
+        setShowThemeMenu(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [showThemeMenu])
 
   const COLUMN_LABELS: Record<string, string> = {
     name: 'Name', email: 'Email', phone: 'Phone',
@@ -415,7 +448,7 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
   }
 
   return (
-    <div className="k2-grid">
+    <div className={`k2-grid ${theme.className}`}>
       {/* Toolbar */}
       <div className="k2-toolbar">
         <div className="k2-toolbar-left">
@@ -448,6 +481,30 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
             value={globalFilter}
             onChange={(e) => setGlobalFilter(e.target.value)}
           />
+          <div className="k2-theme-wrapper" ref={themeRef}>
+            <button
+              className="k2-theme-btn"
+              title="Change theme"
+              onClick={() => setShowThemeMenu(!showThemeMenu)}
+            >
+              <span className="k2-theme-btn-dot" style={{ background: theme.color }} />
+            </button>
+            {showThemeMenu && (
+              <div className="k2-theme-dropdown">
+                {THEMES.map(t => (
+                  <button
+                    key={t.id}
+                    className={`k2-theme-option ${t.id === theme.id ? 'k2-theme-active' : ''}`}
+                    onClick={() => { setTheme(t); localStorage.setItem('k2-grid-theme', t.id); setShowThemeMenu(false) }}
+                  >
+                    <span className="k2-theme-dot" style={{ background: t.color }} />
+                    {t.label}
+                    {t.id === theme.id && <span className="k2-theme-check">✓</span>}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
