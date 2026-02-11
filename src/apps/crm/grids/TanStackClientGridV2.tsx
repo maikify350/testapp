@@ -338,10 +338,10 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
           return <DatePicker defaultValue={editValues.created_at ?? info.getValue()} onValueChange={handleFieldChange} fieldKey="created_at" />
         }
         const date = new Date(info.getValue())
-        const day = String(date.getDate()).padStart(2, '0')
-        const month = String(date.getMonth() + 1).padStart(2, '0')
-        const year = date.getFullYear()
-        return `${day}/${month}/${year}`
+        const day = String(date.getUTCDate()).padStart(2, '0')
+        const month = String(date.getUTCMonth() + 1).padStart(2, '0')
+        const year = date.getUTCFullYear()
+        return `${month}/${day}/${year}`
       },
     }),
     columnHelper.display({
@@ -443,10 +443,10 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
       let val = String(row.getValue(colId) ?? '')
       if (colId === 'created_at') {
         const date = new Date(val)
-        const day = String(date.getDate()).padStart(2, '0')
-        const month = String(date.getMonth() + 1).padStart(2, '0')
-        const year = date.getFullYear()
-        val = `${day}/${month}/${year}`
+        const day = String(date.getUTCDate()).padStart(2, '0')
+        const month = String(date.getUTCMonth() + 1).padStart(2, '0')
+        const year = date.getUTCFullYear()
+        val = `${month}/${day}/${year}`
       }
       if (!groups.has(val)) groups.set(val, [])
       groups.get(val)!.push(row)

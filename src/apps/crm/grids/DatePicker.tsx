@@ -12,24 +12,37 @@ export const DatePicker = React.memo(({
   onValueChange,
   fieldKey
 }: DatePickerProps) => {
-  // Convert ISO timestamp to YYYY-MM-DD format for input
-  const initialDate = defaultValue ? new Date(defaultValue).toISOString().split('T')[0] : '';
+  // Convert ISO timestamp to YYYY-MM-DD format for input (keeping UTC to avoid timezone shift)
+  const initialDate = defaultValue ? defaultValue.split('T')[0] : '';
   const [localValue, setLocalValue] = useState(initialDate);
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const dateStr = e.target.value; // YYYY-MM-DD
     setLocalValue(dateStr);
-    // Convert to ISO string for storage
+    // Convert to ISO string for storage (using UTC to avoid timezone shift)
     if (dateStr) {
-      const isoDate = new Date(dateStr + 'T00:00:00').toISOString();
+      const isoDate = dateStr + 'T00:00:00.000Z';
       onValueChange(fieldKey, isoDate);
     } else {
       onValueChange(fieldKey, '');
     }
   }, [fieldKey, onValueChange]);
 
+  // Format as mm/dd/yyyy for display
+  const displayValue = localValue ? (() => {
+    const [year, month, day] = localValue.split('-');
+    return `${month}/${day}/${year}`;
+  })() : '';
+
   return (
     <div className="k2-date-picker-wrapper">
+      <input
+        type="text"
+        className="k2-date-display"
+        value={displayValue}
+        readOnly
+        placeholder="MM/DD/YYYY"
+      />
       <input
         type="date"
         className="k2-date-picker"

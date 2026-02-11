@@ -121,6 +121,7 @@ function ClientList() {
       email: client.email,
       phone: client.phone,
       company: client.company,
+      created_at: client.created_at,
     }
     const { error } = await supabase
       .from('clients')
