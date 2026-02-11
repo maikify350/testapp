@@ -691,7 +691,7 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
                   key={header.id}
                   className={`k2-header-cell${dragOverId === header.column.id ? ' k2-drag-over' : ''}`}
                   style={{ width: header.getSize() }}
-                  draggable={header.column.id !== 'actions'}
+                  draggable={header.column.id !== 'actions' && header.column.id !== 'select'}
                   onDragStart={(e) => {
                     dragColumnRef.current = header.column.id
                     dragSourceRef.current = 'header'
@@ -703,9 +703,11 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
                     setTimeout(() => { el.style.opacity = '' }, 0)
                   }}
                   onDragOver={(e) => {
+                    if (!dragColumnRef.current || header.column.id === 'actions' || header.column.id === 'select') return
                     e.preventDefault()
+                    e.stopPropagation()
                     e.dataTransfer.dropEffect = 'move'
-                    if (dragColumnRef.current && dragColumnRef.current !== header.column.id && header.column.id !== 'actions') {
+                    if (dragColumnRef.current !== header.column.id) {
                       didDragRef.current = true
                       setDragOverId(header.column.id)
                     }
@@ -718,13 +720,16 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
                     setDragOverId(null)
                     const from = dragColumnRef.current
                     const to = header.column.id
-                    if (from && from !== to && to !== 'actions') {
+                    if (from && from !== to && to !== 'actions' && to !== 'select') {
                       setColumnOrder(prev => {
                         const next = [...prev]
                         const fromIdx = next.indexOf(from)
                         const toIdx = next.indexOf(to)
+                        // Remove from old position
                         next.splice(fromIdx, 1)
-                        next.splice(toIdx, 0, from)
+                        // Insert at new position
+                        const newToIdx = next.indexOf(to)
+                        next.splice(newToIdx, 0, from)
                         return next
                       })
                     }

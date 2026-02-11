@@ -603,7 +603,17 @@
 
 .k2-header-cell.k2-drag-over {
   background: rgba(var(--k2-accent-rgb), 0.2);
-  border-left: 2px solid var(--k2-accent);
+  border-left: 3px solid var(--k2-accent);
+  box-shadow: -8px 0 12px rgba(var(--k2-accent-rgb), 0.3);
+}
+
+/* Add extra space before first draggable column for easier dropping */
+.k2-header-cell[draggable="true"]:nth-child(2) {
+  padding-left: calc(1.5rem + 2px);
+}
+
+.k2-header-cell[draggable="true"]:nth-child(2).k2-drag-over {
+  border-left-width: 4px;
 }
 
 .k2-header-cell:last-child {
