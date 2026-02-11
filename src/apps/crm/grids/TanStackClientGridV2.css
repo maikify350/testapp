@@ -696,6 +696,42 @@
   color: var(--k2-text-bright);
 }
 
+/* --- Freeze button --- */
+.k2-freeze-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  opacity: 0.6;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.k2-freeze-btn:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* --- Frozen column styling --- */
+.k2-frozen-column {
+  background: var(--k2-bg-alt) !important;
+  border-right: 2px solid var(--k2-accent) !important;
+  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.2);
+}
+
+.k2-frozen-column.k2-header-cell {
+  background: var(--k2-bg) !important;
+}
+
+.k2-frozen-column.k2-filter-header-cell {
+  background: var(--k2-bg-alt) !important;
+}
+
 /* --- Sort badge (Kendo-style numbered pill) --- */
 .k2-sort-badge {
   display: inline-flex;

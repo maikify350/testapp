@@ -62,6 +62,41 @@
   background: #f9fafb;
 }
 
+.k2-export-scope-option {
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.k2-export-scope-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.k2-export-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.k2-export-radio-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: #374151;
+}
+
+.k2-export-radio {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
 .k2-export-row-limit {
   display: flex;
   flex-direction: column;

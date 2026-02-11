@@ -251,6 +251,10 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
     return saved === 'true'
   })
   const [focusedRowIndex, setFocusedRowIndex] = useState<number>(-1)
+  const [frozenColumns, setFrozenColumns] = useState<Set<string>>(() => {
+    const saved = localStorage.getItem('k2-grid-frozen-columns')
+    return saved ? new Set(JSON.parse(saved)) : new Set()
+  })
   const dragColumnRef = useRef<string | null>(null)
   const dragSourceRef = useRef<'header' | 'chip' | null>(null)
   const didDragRef = useRef(false)
@@ -325,6 +329,38 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
   useEffect(() => {
     editValuesRef.current = editValues
   }, [editValues])
+
+  // Persist frozen columns
+  useEffect(() => {
+    localStorage.setItem('k2-grid-frozen-columns', JSON.stringify(Array.from(frozenColumns)))
+  }, [frozenColumns])
+
+  // Toggle column freeze/unfreeze
+  const toggleFreezeColumn = useCallback((columnId: string) => {
+    setFrozenColumns(prev => {
+      const next = new Set(prev)
+      if (next.has(columnId)) {
+        next.delete(columnId)
+      } else {
+        next.add(columnId)
+      }
+      return next
+    })
+  }, [])
+
+  // Calculate cumulative left offset for frozen columns
+  const getFrozenColumnLeft = useCallback((columnId: string): number => {
+    const orderedCols = columnOrder.filter(id => frozenColumns.has(id))
+    const index = orderedCols.indexOf(columnId)
+    if (index === -1) return 0
+
+    let left = 0
+    for (let i = 0; i < index; i++) {
+      const col = table.getAllColumns().find(c => c.id === orderedCols[i])
+      left += col?.getSize() || 0
+    }
+    return left
+  }, [columnOrder, frozenColumns, table])
 
   // Memoize edit handlers to prevent recreation
   const handleFieldChange = useCallback((field: string, value: string) => {
@@ -702,11 +738,27 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
               }
             }}
           >
-            {row.getVisibleCells().map((cell) => (
-              <td key={cell.id} className="k2-cell" style={{ width: cell.column.getSize() }}>
+            {row.getVisibleCells().map((cell) => {
+              const isFrozen = frozenColumns.has(cell.column.id)
+              const frozenLeft = isFrozen ? getFrozenColumnLeft(cell.column.id) : undefined
+
+              return (
+              <td
+                key={cell.id}
+                className={`k2-cell${isFrozen ? ' k2-frozen-column' : ''}`}
+                style={{
+                  width: cell.column.getSize(),
+                  ...(isFrozen ? {
+                    position: 'sticky',
+                    left: frozenLeft,
+                    zIndex: 1
+                  } : {})
+                }}
+              >
                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
               </td>
-            ))}
+              )
+            })}
           </tr>
         )
       }
@@ -916,11 +968,22 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
           {/* Header row */}
           <thead>
             <tr className="k2-header-row">
-              {table.getHeaderGroups()[0].headers.map((header) => (
+              {table.getHeaderGroups()[0].headers.map((header) => {
+                const isFrozen = frozenColumns.has(header.column.id)
+                const frozenLeft = isFrozen ? getFrozenColumnLeft(header.column.id) : undefined
+
+                return (
                 <th
                   key={header.id}
-                  className={`k2-header-cell${dragOverId === header.column.id ? ' k2-drag-over' : ''}`}
-                  style={{ width: header.getSize() }}
+                  className={`k2-header-cell${dragOverId === header.column.id ? ' k2-drag-over' : ''}${isFrozen ? ' k2-frozen-column' : ''}`}
+                  style={{
+                    width: header.getSize(),
+                    ...(isFrozen ? {
+                      position: 'sticky',
+                      left: frozenLeft,
+                      zIndex: 2
+                    } : {})
+                  }}
                   draggable={header.column.id !== 'actions' && header.column.id !== 'select'}
                   onDragStart={(e) => {
                     dragColumnRef.current = header.column.id
@@ -1007,6 +1070,19 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
                         )}
                       </span>
                     )}
+                    {/* Freeze/Unfreeze button */}
+                    {header.column.id !== 'select' && header.column.id !== 'actions' && (
+                      <button
+                        className="k2-freeze-btn"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          toggleFreezeColumn(header.column.id)
+                        }}
+                        title={isFrozen ? 'Unfreeze column' : 'Freeze column to left'}
+                      >
+                        {isFrozen ? '🔓' : '📌'}
+                      </button>
+                    )}
                   </div>
                   {header.column.getCanResize() && (
                     <ResizeHandle
@@ -1015,17 +1091,32 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
                     />
                   )}
                 </th>
-              ))}
+                )})}
             </tr>
             {/* Filter row */}
             <tr className="k2-filter-header-row">
-              {table.getHeaderGroups()[0].headers.map((header) => (
-                <th key={`filter-${header.id}`} className="k2-filter-header-cell">
+              {table.getHeaderGroups()[0].headers.map((header) => {
+                const isFrozen = frozenColumns.has(header.column.id)
+                const frozenLeft = isFrozen ? getFrozenColumnLeft(header.column.id) : undefined
+
+                return (
+                <th
+                  key={`filter-${header.id}`}
+                  className={`k2-filter-header-cell${isFrozen ? ' k2-frozen-column' : ''}`}
+                  style={{
+                    ...(isFrozen ? {
+                      position: 'sticky',
+                      left: frozenLeft,
+                      zIndex: 1
+                    } : {})
+                  }}
+                >
                   {header.column.getCanFilter() ? (
                     <ColumnFilter column={header.column} />
                   ) : null}
                 </th>
-              ))}
+                )
+              })}
             </tr>
           </thead>
 
@@ -1165,12 +1256,28 @@ export default function TanStackClientGridV2({ clients, onEdit, onSave, onDelete
       {showExportDialog && (
         <ExportDialog
           totalRows={clients.length}
+          selectedCount={table.getSelectedRowModel().rows.length}
           onClose={() => setShowExportDialog(false)}
-          onExportExcel={(rowLimit, excludeHeaders) => exportToExcel(clients, columnOrder, columnVisibility, rowLimit, excludeHeaders)}
-          onExportCSV={(rowLimit, excludeHeaders) => exportToCSV(clients, columnOrder, columnVisibility, rowLimit, excludeHeaders)}
-          onExportPDF={(rowLimit, excludeHeaders) => exportToPDF(clients, columnOrder, columnVisibility, rowLimit, excludeHeaders)}
-          onExportJSON={(rowLimit, excludeHeaders) => exportToJSON(clients, columnOrder, columnVisibility, rowLimit, excludeHeaders)}
-          onExportXML={(rowLimit, excludeHeaders) => exportToXML(clients, columnOrder, columnVisibility, rowLimit, excludeHeaders)}
+          onExportExcel={(rowLimit, excludeHeaders, selectedOnly) => {
+            const data = selectedOnly ? table.getSelectedRowModel().rows.map(r => r.original) : clients
+            exportToExcel(data, columnOrder, columnVisibility, rowLimit, excludeHeaders)
+          }}
+          onExportCSV={(rowLimit, excludeHeaders, selectedOnly) => {
+            const data = selectedOnly ? table.getSelectedRowModel().rows.map(r => r.original) : clients
+            exportToCSV(data, columnOrder, columnVisibility, rowLimit, excludeHeaders)
+          }}
+          onExportPDF={(rowLimit, excludeHeaders, selectedOnly) => {
+            const data = selectedOnly ? table.getSelectedRowModel().rows.map(r => r.original) : clients
+            exportToPDF(data, columnOrder, columnVisibility, rowLimit, excludeHeaders)
+          }}
+          onExportJSON={(rowLimit, excludeHeaders, selectedOnly) => {
+            const data = selectedOnly ? table.getSelectedRowModel().rows.map(r => r.original) : clients
+            exportToJSON(data, columnOrder, columnVisibility, rowLimit, excludeHeaders)
+          }}
+          onExportXML={(rowLimit, excludeHeaders, selectedOnly) => {
+            const data = selectedOnly ? table.getSelectedRowModel().rows.map(r => r.original) : clients
+            exportToXML(data, columnOrder, columnVisibility, rowLimit, excludeHeaders)
+          }}
         />
       )}
     </div>
